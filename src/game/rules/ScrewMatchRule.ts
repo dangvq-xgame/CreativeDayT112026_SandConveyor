@@ -4,30 +4,68 @@ import { LinearConveyorModel } from '../models/LinearConveyorModel';
 import { QueueColumnModel } from '../models/QueueColumnModel';
 import { SandBucketModel } from '../models/SandBucketModel';
 
+/** Describes one screw flight for the view layer (source → target). The model is already updated. */
 export interface ScrewFlightPlan {
   colorId: ColorId;
   sourceType: 'queue' | 'buffer';
+  /** Column index (queue) or buffer slot index (buffer). */
   sourceIndex: number;
+  /** Depth in the column the screw came from (0 = top). */
   sourceDepthIndex?: number;
   targetType: 'bucket' | 'buffer';
   targetBucket?: SandBucketModel;
+  /** Conveyor slot (bucket target) or buffer slot (buffer target). */
   targetSlotIndex: number;
   targetHoleIndex?: number;
+  /**
+   * Buffer target only: reservation token to pass to `BufferDockModel.markSlotLanded(slot, id)` when
+   * the flight lands.
+   */
+  bufferReservationId?: number;
+  /**
+   * Hand booster only: no real screw of this color was left anywhere, so the hole was filled with a
+   * conjured screw (only happens with inconsistent level data).
+   */
+  isPhantom?: boolean;
 }
 
+/** Result of tapping a queue column. */
+export interface PopColumnResult {
+  ok: boolean;
+  /** `true` = buffer full and no bucket accepts the screw → lose / revive. */
+  outOfSpace: boolean;
+  flight?: ScrewFlightPlan;
+}
+
+/** Where the top screw of a column would go if tapped now. */
+export type ScrewRoute = 'bucket' | 'buffer' | 'out_of_space' | 'empty';
+
 export class ScrewMatchRule {
+  /** Predicts the outcome of {@link popColumnTop} without changing anything. */
+  static predictRoute(
+    column: QueueColumnModel,
+    conveyor: LinearConveyorModel,
+    bufferDock: BufferDockModel
+  ): ScrewRoute {
+    const top = column.peekTop();
+    if (!top) return 'empty';
+    if (conveyor.findTargetBucketForScrew(top.colorId)) return 'bucket';
+    return bufferDock.findFirstEmptySlotIndex() >= 0 ? 'buffer' : 'out_of_space';
+  }
+
   /**
-   * Attempts to pop the top screw from a QueueColumn and route it to either:
-   * 1) A matching locked bucket on the LinearConveyor (if one has an open hole), or
-   * 2) The first empty slot in BufferDock.
-   * If BufferDock is full and no bucket matches, returns `{ ok: false, outOfSpace: true }`.
+   * Pops the top screw of `column` and routes it to:
+   * 1. a locked bucket of the same color with a free hole (see `findTargetBucketForScrew`), or
+   * 2. the first empty BufferDock slot.
+   * If neither is possible the column is left untouched, `lastBonkTimeMs` is stamped and
+   * `{ ok: false, outOfSpace: true }` is returned (lose condition).
    */
   static popColumnTop(
     column: QueueColumnModel,
     conveyor: LinearConveyorModel,
     bufferDock: BufferDockModel,
     nowMs: number
-  ): { ok: boolean; outOfSpace: boolean; flight?: ScrewFlightPlan } {
+  ): PopColumnResult {
     const top = column.peekTop();
     if (!top) {
       return { ok: false, outOfSpace: false };
@@ -70,13 +108,15 @@ export class ScrewMatchRule {
         sourceIndex: column.columnIndex,
         sourceDepthIndex: 0,
         targetType: 'buffer',
-        targetSlotIndex: emptyBufIdx
+        targetSlotIndex: emptyBufIdx,
+        bufferReservationId: bufferDock.getReservationId(emptyBufIdx) ?? undefined
       }
     };
   }
 
   /**
-   * Checks if any landed screws sitting in BufferDock can now fly up into newly spawned buckets on the conveyor.
+   * Sends every *landed* BufferDock screw that now has a matching locked bucket (e.g. a newly spawned
+   * one) up to that bucket. Screws still in flight are left alone until they land.
    */
   static flushBufferToConveyor(
     conveyor: LinearConveyorModel,
@@ -104,5 +144,19 @@ export class ScrewMatchRule {
     }
     return plans;
   }
-}
 
+  /**
+   * `true` when at least one column can be tapped without losing (its top goes to a bucket or there is
+   * buffer room). `false` means every possible tap is a lose — useful for a "no moves" hint.
+   */
+  static hasSafeMove(
+    columns: readonly QueueColumnModel[],
+    conveyor: LinearConveyorModel,
+    bufferDock: BufferDockModel
+  ): boolean {
+    return columns.some((col) => {
+      const route = ScrewMatchRule.predictRoute(col, conveyor, bufferDock);
+      return route === 'bucket' || route === 'buffer';
+    });
+  }
+}

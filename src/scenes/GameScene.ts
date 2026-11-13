@@ -54,6 +54,9 @@ export class GameScene {
   private resultScene: ResultScene;
 
   private flyingScrews: ActiveFlyingScrew[] = [];
+  private bgImage: HTMLImageElement | null = null;
+  private bgImageLoaded = false;
+  private gameSpeed: 1 | 2 | 5 = 1;
 
   // Responsive layout metrics
   private viewW = 480;
@@ -80,7 +83,8 @@ export class GameScene {
       onToggleSound: () => {
         AudioManager.setSoundEnabled(!AudioManager.isSoundEnabled());
         this.syncHud();
-      }
+      },
+      onToggleSpeed: () => this.cycleGameSpeed()
     });
 
     this.boosterBar = new BoosterBarView({
@@ -116,6 +120,17 @@ export class GameScene {
     });
 
     this.bindEvents();
+    this.initBackgroundArt();
+  }
+
+  private initBackgroundArt(): void {
+    if (typeof Image === 'undefined') return;
+    const img = new Image();
+    img.onload = () => {
+      this.bgImageLoaded = true;
+    };
+    img.src = './assets/images/ui/unity_game_bg.jpg';
+    this.bgImage = img;
   }
 
   startLevel(levelId: number): void {
@@ -151,18 +166,21 @@ export class GameScene {
 
     if (!this.state) return;
 
-    const topAreaY = 64;
-    const maxBoardH = this.viewH * 0.28;
+    const topAreaY = 58;
+    const maxBoardH = this.viewH * 0.295;
     const gw = this.state.sandBoard.width;
     const gh = this.state.sandBoard.height;
 
-    this.boardCellSize = Math.floor(Math.min((this.viewW - 56) / gw, (maxBoardH - 16) / gh));
+    this.boardCellSize = Math.max(
+      7,
+      Math.floor(Math.min((this.viewW - 44) / gw, (maxBoardH - 12) / gh))
+    );
     this.boardFrameX = Math.round((this.viewW - gw * this.boardCellSize) / 2);
-    this.boardFrameY = topAreaY + 8;
+    this.boardFrameY = topAreaY + 10;
     this.boardBottomY = this.boardFrameY + gh * this.boardCellSize;
 
-    const bucketWidth = Math.min(78, (this.viewW - 32) / 4.4);
-    const bucketCenterY = this.boardBottomY + this.viewH * 0.072;
+    const bucketWidth = Math.min(76, (this.viewW - 28) / 4.4);
+    const bucketCenterY = this.boardBottomY + this.viewH * 0.068;
     const beltLeftX = 8;
     const beltRightX = this.viewW - 8;
     const tunnelWidth = bucketWidth * 0.5;
@@ -183,24 +201,24 @@ export class GameScene {
       bucketWidth
     };
 
-    this.bufferDockY = bucketCenterY + bucketWidth * 0.94;
-    this.bufferSlotSize = Math.min(34, (this.viewW - 86) / 6.2);
+    this.bufferDockY = bucketCenterY + bucketWidth * 0.92;
+    this.bufferSlotSize = Math.min(33, (this.viewW - 96) / 6.2);
 
-    const zoneX = 16;
-    const zoneY = this.bufferDockY + this.bufferSlotSize * 0.85 + 14;
-    const zoneW = this.viewW - 32;
-    const bottomBoosterBarReserve = 82;
-    const zoneH = Math.max(140, this.viewH - zoneY - bottomBoosterBarReserve);
+    const zoneX = 14;
+    const zoneY = this.bufferDockY + this.bufferSlotSize * 0.85 + 18;
+    const zoneW = this.viewW - 28;
+    const bottomBoosterBarReserve = 96;
+    const zoneH = Math.max(136, this.viewH - zoneY - bottomBoosterBarReserve);
 
     const numCols = this.state.queueColumns.length;
     const visibleDepth = BalanceConfig.queueColumns.visibleDepth;
     const tubeWidth = Math.min(
-      76,
-      ((zoneW - 10) / numCols) * 0.84,
-      (zoneH - 32) / (visibleDepth * 0.78 + 0.44)
+      72,
+      ((zoneW - 14) / numCols) * 0.82,
+      (zoneH - 36) / (visibleDepth * 0.78 + 0.48)
     );
-    const screwRadius = tubeWidth * 0.36;
-    const rowStepY = screwRadius * 2.14;
+    const screwRadius = tubeWidth * 0.35;
+    const rowStepY = screwRadius * 2.12;
 
     this.queueLayout = {
       zoneX,
@@ -228,6 +246,14 @@ export class GameScene {
     window.addEventListener('pointercancel', () => this.input.onPointerUp());
   }
 
+  cycleGameSpeed(): void {
+    if (this.gameSpeed === 1) this.gameSpeed = 2;
+    else if (this.gameSpeed === 2) this.gameSpeed = 5;
+    else this.gameSpeed = 1;
+    AudioManager.playUiClick();
+    this.topHud.setSpeed(this.gameSpeed);
+  }
+
   private handleCanvasTap(x: number, y: number, nowMs: number): void {
     if (!this.state) return;
 
@@ -253,14 +279,59 @@ export class GameScene {
 
     if (this.fsm.phase !== 'PLAYING') return;
 
-    // 2. Check if user tapped one of the QueueColumns
+    // 2. Check if user tapped the in-canvas green [+] ExtraSlot button next to BufferDock
+    const extraBtn = BufferDockView.getExtraSlotButtonCenter(
+      this.viewW / 2,
+      this.bufferDockY,
+      this.state.bufferDock.getCapacity(),
+      this.bufferSlotSize
+    );
+    if (Math.hypot(x - extraBtn.x, y - extraBtn.y) <= extraBtn.radius * 1.25) {
+      this.handleUseExtraSlot();
+      return;
+    }
+
+    // 3. Check if user tapped a LOCKED BAY on the conveyor (Fish Jam Fever style: tap to unlock bay directly!)
+    const { bucketCenterY, bucketWidth, trackStartX, trackEndX, visibleMinX, visibleMaxX } = this.conveyorLayout;
+    if (Math.abs(y - bucketCenterY) <= bucketWidth * 0.72) {
+      for (let i = this.state.conveyor.activeSlots; i < this.state.conveyor.maxActiveSlots; i++) {
+        const bayX = this.state.conveyor.getSlotX(i, trackStartX, trackEndX, visibleMinX, visibleMaxX);
+        if (Math.abs(x - bayX) <= bucketWidth * 0.5) {
+          this.handleUseExtraSlot();
+          return;
+        }
+      }
+    }
+
+    // 4. Check if user tapped a locked bucket on the conveyor to auto-pull a matching top screw from QueueColumns
+    if (Math.abs(y - bucketCenterY) <= bucketWidth * 0.62) {
+      for (let i = 0; i < this.state.conveyor.activeSlots; i++) {
+        const b = this.state.conveyor.slots[i];
+        if (
+          b &&
+          !b.isOpen &&
+          b.getMissingScrewsCount() > 0 &&
+          Math.abs(x - b.visualX) <= bucketWidth * 0.5
+        ) {
+          const matchingColIdx = this.state.queueColumns.findIndex(
+            (col) => col.peekTop()?.colorId === b.colorId
+          );
+          if (matchingColIdx >= 0) {
+            this.tapQueueColumn(matchingColIdx, nowMs);
+            return;
+          }
+        }
+      }
+    }
+
+    // 4. Check if user tapped one of the QueueColumns
     const { zoneY, zoneH, zoneW } = this.queueLayout;
-    if (y >= zoneY - 12 && y <= zoneY + zoneH + 10) {
+    if (y >= zoneY - 16 && y <= zoneY + zoneH + 16) {
       const cols = this.state.queueColumns;
-      const pitch = (zoneW - 12) / cols.length;
+      const pitch = (zoneW - 20) / cols.length;
       for (let c = 0; c < cols.length; c++) {
         const cx = QueueColumnView.getTubeCenterX(c, cols.length, this.viewW / 2, zoneW);
-        if (Math.abs(x - cx) <= pitch * 0.48) {
+        if (Math.abs(x - cx) <= pitch * 0.49) {
           this.tapQueueColumn(c, nowMs);
           break;
         }
@@ -319,7 +390,7 @@ export class GameScene {
         this.viewW / 2,
         plan.sourceIndex,
         this.state.bufferDock.getCapacity(),
-        this.bufferSlotSize * 1.28
+        this.bufferSlotSize * 1.24
       );
       fromY = this.bufferDockY;
     }
@@ -340,7 +411,7 @@ export class GameScene {
         this.viewW / 2,
         plan.targetSlotIndex,
         this.state.bufferDock.getCapacity(),
-        this.bufferSlotSize * 1.28
+        this.bufferSlotSize * 1.24
       );
       toY = this.bufferDockY;
     }
@@ -501,6 +572,8 @@ export class GameScene {
   update(nowMs: number, dtSec: number): void {
     if (!this.state) return;
 
+    const effDt = dtSec * this.gameSpeed;
+
     if (
       this.fsm.phase === 'BOOSTER_SHUFFLE_ANIM' &&
       !this.shuffleFX.isActive(nowMs)
@@ -510,7 +583,7 @@ export class GameScene {
     }
 
     // 1. Update flying screws
-    const flightDuration = GameConfig.screwFlightDurationMs;
+    const flightDuration = Math.round(GameConfig.screwFlightDurationMs / this.gameSpeed);
     for (let i = this.flyingScrews.length - 1; i >= 0; i--) {
       const fs = this.flyingScrews[i];
       if (fs.plan.targetType === 'bucket' && fs.plan.targetBucket) {
@@ -540,7 +613,7 @@ export class GameScene {
                 this.conveyorLayout.bucketCenterY - this.conveyorLayout.bucketWidth * 0.44,
                 fs.plan.targetBucket!.colorId
               );
-            }, GameConfig.lidTwistDurationMs);
+            }, Math.round(GameConfig.lidTwistDurationMs / this.gameSpeed));
           }
         } else if (fs.plan.targetType === 'buffer') {
           this.state.bufferDock.markSlotLanded(fs.plan.targetSlotIndex);
@@ -561,18 +634,21 @@ export class GameScene {
       }
     }
 
-    // 3. Advance Linear Conveyor belt & bucket positions (unless paused for Hand Booster)
+    // 3. Advance Linear Conveyor belt & bucket positions (Fish Jam Fever fixed bay stations)
     if (this.fsm.phase === 'PLAYING' || this.fsm.phase === 'BOOSTER_SHUFFLE_ANIM') {
       const speedMult = this.input.getSpeedMultiplier(nowMs);
-      this.state.conveyor.advanceBelt(dtSec, speedMult);
+      this.state.conveyor.advanceBelt(effDt, speedMult);
 
-      const { trackStartX, trackEndX, visibleMaxX, bucketWidth } = this.conveyorLayout;
+      const { trackStartX, trackEndX, visibleMinX, visibleMaxX, bucketWidth } = this.conveyorLayout;
       for (let i = 0; i < this.state.conveyor.activeSlots; i++) {
         const b = this.state.conveyor.slots[i];
-        const nextX = this.state.conveyor.getSlotX(i, trackStartX, trackEndX);
+        const targetX = this.state.conveyor.getSlotX(i, trackStartX, trackEndX, visibleMinX, visibleMaxX);
         if (b) {
-          b.visualX = nextX;
-          if (b.completedAtMs !== null && nowMs - b.completedAtMs > 280) {
+          if (b.spawnEnterOffsetPx > 0) {
+            b.spawnEnterOffsetPx = Math.max(0, b.spawnEnterOffsetPx - 450 * effDt);
+          }
+          b.visualX = targetX - b.spawnEnterOffsetPx;
+          if (b.completedAtMs !== null && nowMs - b.completedAtMs > (260 / this.gameSpeed)) {
             this.state.conveyor.leavingBuckets.push(b);
             this.state.conveyor.slots[i] = null;
           }
@@ -581,8 +657,8 @@ export class GameScene {
 
       for (let i = this.state.conveyor.leavingBuckets.length - 1; i >= 0; i--) {
         const lb = this.state.conveyor.leavingBuckets[i];
-        lb.visualX += 420 * dtSec;
-        if (lb.visualX >= visibleMaxX + bucketWidth * 0.55) {
+        lb.visualX += 480 * effDt;
+        if (lb.visualX >= visibleMaxX + bucketWidth * 0.6) {
           this.state.conveyor.leavingBuckets.splice(i, 1);
         }
       }
@@ -592,13 +668,14 @@ export class GameScene {
         this.conveyorLayout.trackEndX,
         this.conveyorLayout.visibleMinX,
         this.conveyorLayout.visibleMaxX,
+        false,
         true
       );
     }
 
     // 4. Suction of bottom-row sand grains into open buckets on the conveyor
     if (this.fsm.phase === 'PLAYING' && nowMs >= this.state.nextSuctionAtMs) {
-      const lidReadyDelay = GameConfig.lidTwistDurationMs + GameConfig.lidFlipDurationMs;
+      const lidReadyDelay = (GameConfig.lidTwistDurationMs + GameConfig.lidFlipDurationMs) / this.gameSpeed;
       const drainEv = SandSuctionRule.stepSuction(
         this.state.sandBoard,
         this.state.conveyor,
@@ -609,6 +686,7 @@ export class GameScene {
       );
 
       if (drainEv) {
+        SandBoardView.notifySuctionColumn(drainEv.col);
         const startX = this.boardFrameX + (drainEv.col + 0.5) * this.boardCellSize;
         const startY = this.boardBottomY - this.boardCellSize * 0.5;
         this.sandStreamFX.spawnGrain(
@@ -624,16 +702,16 @@ export class GameScene {
         if (drainEv.bucketCompleted) {
           AudioManager.playBucketComplete();
         }
-        const interval = Math.max(14, Math.round(680 / Math.max(8, drainEv.bucket.capacity)));
+        const interval = Math.max(10, Math.round(650 / Math.max(8, drainEv.bucket.capacity) / this.gameSpeed));
         this.state.nextSuctionAtMs = nowMs + interval;
         this.syncHud();
       }
     }
 
     // 5. Update sand gravity, sand stream particles & confetti
-    this.state.sandBoard.updateGravity(dtSec, GameConfig.gravityPxPerSecSq);
-    this.sandStreamFX.update(nowMs, dtSec);
-    this.confettiFX.update(dtSec);
+    this.state.sandBoard.updateGravity(effDt, GameConfig.gravityPxPerSecSq);
+    this.sandStreamFX.update(nowMs, effDt);
+    this.confettiFX.update(effDt);
 
     // 6. Check Win Condition
     if (this.fsm.phase === 'PLAYING' && this.state.isLevelWon()) {
@@ -655,13 +733,20 @@ export class GameScene {
     const ctx = this.ctx;
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
 
-    // Sky background gradient
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, this.viewH);
-    skyGrad.addColorStop(0, '#a8d8ff');
-    skyGrad.addColorStop(0.55, '#bfe3fb');
-    skyGrad.addColorStop(1, '#d8eeff');
-    ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, this.viewW, this.viewH);
+    // Unity 3D mobile background image with sky-blue gradient fallback
+    if (this.bgImageLoaded && this.bgImage) {
+      ctx.drawImage(this.bgImage, 0, 0, this.viewW, this.viewH);
+      // Soft atmospheric veil so gameplay elements pop with high contrast
+      ctx.fillStyle = 'rgba(205, 236, 255, 0.22)';
+      ctx.fillRect(0, 0, this.viewW, this.viewH);
+    } else {
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, this.viewH);
+      skyGrad.addColorStop(0, '#a8d8ff');
+      skyGrad.addColorStop(0.55, '#bfe3fb');
+      skyGrad.addColorStop(1, '#d8eeff');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, this.viewW, this.viewH);
+    }
 
     // 1. Upper Area: SandBoard (Sand Loop style)
     SandBoardView.draw(
@@ -685,13 +770,14 @@ export class GameScene {
       this.fsm.phase === 'BOOSTER_HAND_SELECT'
     );
 
-    // 4. Buffer Dock (5 waiting holes)
+    // 4. Buffer Dock (5 waiting holes + [+] ExtraSlot button)
     BufferDockView.draw(
       ctx,
       this.state.bufferDock,
       this.viewW / 2,
       this.bufferDockY,
-      this.bufferSlotSize
+      this.bufferSlotSize,
+      this.state.conveyor
     );
 
     // 5. Lower Area: Color Blast Queue Columns (Glass Tubes with top 3 screws + '+N' badge)
@@ -725,7 +811,8 @@ export class GameScene {
 
       ScrewView.draw(ctx, x, y, this.bufferSlotSize * 0.38, fs.plan.colorId, {
         rotation: e * 12,
-        scale: 1 + (e < 0.3 ? e : 0.3 * (1 - k))
+        scale: 1 + (e < 0.3 ? e : 0.3 * (1 - k)),
+        showShaft: e < 0.72
       });
     }
 

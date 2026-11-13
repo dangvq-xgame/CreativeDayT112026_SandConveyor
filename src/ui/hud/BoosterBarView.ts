@@ -48,19 +48,18 @@ export class BoosterBarView {
       ? 'MAX'
       : extraSlot > 0
         ? String(extraSlot)
-        : `🪙${BalanceConfig.boosters.extraSlot.coinCost}`;
+        : `${BalanceConfig.boosters.extraSlot.coinCost}`;
     this.btnExtraSlot.disabled = maxedOutSlots;
 
     // Booster 2: Hand
     this.badgeHand.textContent =
-      hand > 0 ? String(hand) : `🪙${BalanceConfig.boosters.hand.coinCost}`;
+      hand > 0 ? String(hand) : `${BalanceConfig.boosters.hand.coinCost}`;
     this.btnHand.disabled = !hasLockedBuckets;
     this.btnHand.classList.toggle('active-mode', isHandSelecting);
 
     // Booster 3: Shuffle
     this.badgeShuffle.textContent =
-      shuffle > 0 ? String(shuffle) : `🪙${BalanceConfig.boosters.shuffle.coinCost}`;
+      shuffle > 0 ? String(shuffle) : `${BalanceConfig.boosters.shuffle.coinCost}`;
     this.btnShuffle.disabled = totalQueueScrews < 2;
   }
 }
-

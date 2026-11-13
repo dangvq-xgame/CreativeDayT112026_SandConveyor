@@ -1,4 +1,6 @@
+import { GameConfig, GameplayConfig } from '../../config/game.config';
 import { ColorId } from '../../types/level.types';
+import { toIntAtLeast } from '../../utils/math.utils';
 
 export interface SandCell {
   colorId: ColorId;
@@ -9,28 +11,55 @@ export interface SandCell {
   velocityY: number;
 }
 
+/** A cell picked for suction. */
+export interface SandPullResult {
+  col: number;
+  row: number;
+  colorId: ColorId;
+}
+
+interface PullCandidate {
+  col: number;
+  row: number;
+  originY: number;
+  dist: number;
+}
+
+function isSandColor(value: unknown): value is ColorId {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0;
+}
+
+/**
+ * The sand picture. `cells[y][x]` (y = 0 is the top row, `height - 1` the bottom row touching the belt).
+ * Sand is pulled from the bottom of a column and everything above falls down one row (gravity).
+ */
 export class SandBoardModel {
   readonly width: number;
   readonly height: number;
   readonly subDivision: number;
+  /** Always exactly `height` rows × `width` columns, whatever the shape of the source grid. */
   readonly cells: Array<Array<SandCell | null>>;
   readonly totalInitialCells: number;
   private drainedCells = 0;
 
+  /**
+   * @param grid Row-major colorIds (`0` = empty). Rows/columns missing from `grid` are treated as empty,
+   *             extra ones are ignored, and invalid values (negative, non-integer, NaN) become empty.
+   */
   constructor(width: number, height: number, subDivision: number, grid: ColorId[][]) {
-    this.width = width;
-    this.height = height;
-    this.subDivision = subDivision;
+    this.width = toIntAtLeast(width, 0, 0);
+    this.height = toIntAtLeast(height, 0, 0);
+    this.subDivision = toIntAtLeast(subDivision, 1, GameplayConfig.defaultSubDivision);
     let count = 0;
-    this.cells = grid.map((row, y) =>
-      row.map((cid) => {
-        if (cid > 0) {
-          count++;
-          return { colorId: cid, originY: y, offsetY: 0, velocityY: 0 };
-        }
-        return null;
-      })
-    );
+    this.cells = Array.from({ length: this.height }, (_, y) => {
+      const row = Array.isArray(grid?.[y]) ? grid[y] : [];
+      return Array.from({ length: this.width }, (_, x): SandCell | null => {
+        const cid = row[x];
+        if (!isSandColor(cid)) return null;
+        count++;
+        return { colorId: cid, originY: y, offsetY: 0, velocityY: 0 };
+      });
+    });
     this.totalInitialCells = count;
   }
 
@@ -42,8 +71,46 @@ export class SandBoardModel {
     return this.totalInitialCells - this.drainedCells;
   }
 
+  /** Drained ratio in `[0, 1]` (an empty board counts as fully drained). */
   getProgressRatio(): number {
     return this.totalInitialCells > 0 ? this.drainedCells / this.totalInitialCells : 1;
+  }
+
+  /** `true` once every sand cell has been drained. */
+  isCleared(): boolean {
+    return this.getRemainingCells() <= 0;
+  }
+
+  /** Cell at (x, y) or `null` if empty / out of bounds. */
+  getCell(x: number, y: number): SandCell | null {
+    return this.cells[y]?.[x] ?? null;
+  }
+
+  /** Remaining cells of `colorId` anywhere on the board. */
+  countCellsOfColor(colorId: ColorId): number {
+    let n = 0;
+    for (const row of this.cells) {
+      for (const cell of row) {
+        if (cell && cell.colorId === colorId) n++;
+      }
+    }
+    return n;
+  }
+
+  /** Remaining cell count per colorId. */
+  getRemainingColorCounts(): Map<ColorId, number> {
+    const out = new Map<ColorId, number>();
+    for (const row of this.cells) {
+      for (const cell of row) {
+        if (cell) out.set(cell.colorId, (out.get(cell.colorId) ?? 0) + 1);
+      }
+    }
+    return out;
+  }
+
+  /** `true` when no cell is still falling (all offsets settled at 0). */
+  isSettled(): boolean {
+    return this.cells.every((row) => row.every((cell) => !cell || cell.offsetY >= 0));
   }
 
   /**
@@ -58,44 +125,64 @@ export class SandBoardModel {
   }
 
   /**
-   * Finds a column whose bottom-most cell has matching colorId, prioritizing the lowest original stratum
-   * (`originY` descending) first so the picture drains evenly layer-by-layer without vertical chimneys,
-   * and breaking ties by proximity to `preferredColX`.
+   * Picks (without removing) the cell `pullBottomCellOfColor` would drain, or `null`.
+   *
+   * 1. Columns whose bottom-most cell has `colorId`, preferring the lowest current row, then the lowest
+   *    original stratum (`originY` desc) so the picture drains layer by layer without vertical chimneys,
+   *    then proximity to `preferredColX`, then the leftmost column.
+   * 2. If no column exposes `colorId` at its bottom (e.g. an inner detail), fall back to the lowest
+   *    buried cell of `colorId` in each column, same ordering (SandLoopGame DrawableChunk.cs
+   *    `isBreakIfOtherColor = false`, so an open bucket never deadlocks).
    */
-  pullBottomCellOfColor(
-    colorId: ColorId,
-    cellSizePx = 20,
-    preferredColX?: number
-  ): { col: number; row: number; colorId: ColorId } | null {
-    const candidates: Array<{ col: number; row: number; originY: number; dist: number }> = [];
+  findPullCandidate(colorId: ColorId, preferredColX?: number): SandPullResult | null {
+    const distOf = (x: number): number => (preferredColX !== undefined ? Math.abs(x - preferredColX) : x);
+    const candidates: PullCandidate[] = [];
     for (let x = 0; x < this.width; x++) {
       const y = this.getLowestRow(x);
       const cell = y >= 0 ? this.cells[y][x] : null;
       if (cell && cell.colorId === colorId) {
-        const dist = preferredColX !== undefined ? Math.abs(x - preferredColX) : x;
-        candidates.push({ col: x, row: y, originY: cell.originY, dist });
+        candidates.push({ col: x, row: y, originY: cell.originY, dist: distOf(x) });
       }
     }
+
+    if (candidates.length === 0) {
+      for (let x = 0; x < this.width; x++) {
+        for (let y = this.height - 1; y >= 0; y--) {
+          const cell = this.cells[y][x];
+          if (cell && cell.colorId === colorId) {
+            candidates.push({ col: x, row: y, originY: cell.originY, dist: distOf(x) });
+            break; // Only the lowest matching cell in this column
+          }
+        }
+      }
+    }
+
     if (candidates.length === 0) return null;
-    candidates.sort((a, b) => b.originY - a.originY || a.dist - b.dist || a.col - b.col);
-    const chosen = candidates[0];
-    const { col, row } = chosen;
-
-    // Shift column down via gravity
-    for (let yy = row; yy > 0; yy--) {
-      this.cells[yy][col] = this.cells[yy - 1][col];
-      const cell = this.cells[yy][col];
-      if (cell) {
-        cell.offsetY -= cellSizePx;
-      }
+    let best = candidates[0];
+    for (let i = 1; i < candidates.length; i++) {
+      if (compareCandidates(candidates[i], best) < 0) best = candidates[i];
     }
-    this.cells[0][col] = null;
-    this.drainedCells++;
-
-    return { col, row, colorId };
+    return { col: best.col, row: best.row, colorId };
   }
 
-  updateGravity(dtSec: number, gravityPxPerSecSq = 2400): void {
+  /**
+   * Drains one cell of `colorId` (see {@link findPullCandidate}) and lets the column above fall by one
+   * row (cells get a negative `offsetY` of one cell so {@link updateGravity} can animate the fall).
+   */
+  pullBottomCellOfColor(
+    colorId: ColorId,
+    cellSizePx: number = GameplayConfig.defaultCellSizePx,
+    preferredColX?: number
+  ): SandPullResult | null {
+    const chosen = this.findPullCandidate(colorId, preferredColX);
+    if (!chosen) return null;
+    this.removeCellAndCollapse(chosen.col, chosen.row, cellSizePx);
+    return chosen;
+  }
+
+  /** Advances the falling animation. Invalid / non-positive `dtSec` is ignored. */
+  updateGravity(dtSec: number, gravityPxPerSecSq: number = GameConfig.gravityPxPerSecSq): void {
+    if (!Number.isFinite(dtSec) || dtSec <= 0) return;
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const cell = this.cells[y][x];
@@ -109,4 +196,19 @@ export class SandBoardModel {
       }
     }
   }
+
+  private removeCellAndCollapse(col: number, row: number, cellSizePx: number): void {
+    for (let yy = row; yy > 0; yy--) {
+      const above = this.cells[yy - 1][col];
+      this.cells[yy][col] = above;
+      if (above) above.offsetY -= cellSizePx;
+    }
+    this.cells[0][col] = null;
+    this.drainedCells++;
+  }
+}
+
+/** Lower row first, then lower origin stratum, then closer to the preferred column, then leftmost. */
+function compareCandidates(a: PullCandidate, b: PullCandidate): number {
+  return b.row - a.row || b.originY - a.originY || a.dist - b.dist || a.col - b.col;
 }

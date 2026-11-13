@@ -1,107 +1,37 @@
 {
   "version": 1,
   "levelId": 4,
-  "title": "Rainbow Strata",
+  "title": "Cáo Nhỏ Tinh Nghịch",
   "difficulty": "medium",
-  "rewardCoins": 120,
+  "rewardCoins": 220,
   "conveyorConfig": {
     "initialActiveSlots": 2,
     "maxActiveSlots": 4,
     "bufferSlots": 5
   },
   "sandBoard": {
-    "width": 14,
-    "height": 10,
+    "width": 24,
+    "height": 20,
     "subDivision": 4,
     "grid": [
       [
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8
-      ],
-      [
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5
-      ],
-      [
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10
-      ],
-      [
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10
-      ],
-      [
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
         9,
         9,
         9,
         9,
         9,
         9,
-        9
-      ],
-      [
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
         9,
         9,
         9,
@@ -118,13 +48,387 @@
         9,
         9,
         9,
-        7,
-        7,
-        7,
-        7,
-        7,
-        7,
-        7
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        5,
+        5,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        5,
+        5,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        5,
+        6,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        6,
+        5,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        5,
+        5,
+        6,
+        6,
+        5,
+        9,
+        9,
+        5,
+        5,
+        5,
+        5,
+        9,
+        9,
+        5,
+        6,
+        6,
+        5,
+        5,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        5,
+        5,
+        3,
+        3,
+        5,
+        5,
+        5,
+        5,
+        3,
+        3,
+        5,
+        5,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        5,
+        5,
+        3,
+        3,
+        5,
+        11,
+        11,
+        5,
+        3,
+        3,
+        5,
+        5,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        5,
+        5,
+        6,
+        6,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        6,
+        6,
+        5,
+        5,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        5,
+        11,
+        11,
+        11,
+        11,
+        3,
+        3,
+        11,
+        11,
+        11,
+        11,
+        5,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        11,
+        11,
+        11,
+        11,
+        11,
+        3,
+        3,
+        11,
+        11,
+        11,
+        11,
+        11,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
       ],
       [
         9,
@@ -134,148 +438,179 @@
         9,
         9,
         9,
-        7,
-        7,
-        7,
-        7,
-        7,
-        7,
-        7
+        9,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
       ],
       [
-        7,
-        7,
-        7,
-        7,
-        7,
-        7,
-        7,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        5,
+        11,
+        11,
+        5,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
       ],
       [
-        7,
-        7,
-        7,
-        7,
-        7,
-        7,
-        7,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8,
-        8
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
       ]
     ]
   },
   "bucketQueue": [
     {
-      "id": 401,
-      "colorId": 8,
-      "capacity": 14,
-      "requiredScrews": 3
-    },
-    {
-      "id": 402,
-      "colorId": 7,
-      "capacity": 14,
-      "requiredScrews": 3
-    },
-    {
-      "id": 403,
-      "colorId": 7,
-      "capacity": 14,
-      "requiredScrews": 3
-    },
-    {
-      "id": 404,
+      "id": 1,
       "colorId": 9,
-      "capacity": 14,
+      "capacity": 58,
       "requiredScrews": 3
     },
     {
-      "id": 405,
+      "id": 2,
+      "colorId": 11,
+      "capacity": 60,
+      "requiredScrews": 3
+    },
+    {
+      "id": 3,
+      "colorId": 5,
+      "capacity": 54,
+      "requiredScrews": 3
+    },
+    {
+      "id": 4,
+      "colorId": 3,
+      "capacity": 12,
+      "requiredScrews": 3
+    },
+    {
+      "id": 5,
+      "colorId": 6,
+      "capacity": 10,
+      "requiredScrews": 3
+    },
+    {
+      "id": 6,
       "colorId": 9,
-      "capacity": 14,
+      "capacity": 58,
       "requiredScrews": 3
     },
     {
-      "id": 406,
-      "colorId": 10,
-      "capacity": 14,
-      "requiredScrews": 3
-    },
-    {
-      "id": 407,
-      "colorId": 10,
-      "capacity": 14,
-      "requiredScrews": 3
-    },
-    {
-      "id": 408,
+      "id": 7,
       "colorId": 5,
-      "capacity": 14,
+      "capacity": 54,
       "requiredScrews": 3
     },
     {
-      "id": 409,
-      "colorId": 5,
-      "capacity": 14,
+      "id": 8,
+      "colorId": 9,
+      "capacity": 58,
       "requiredScrews": 3
     },
     {
-      "id": 410,
-      "colorId": 8,
-      "capacity": 14,
+      "id": 9,
+      "colorId": 9,
+      "capacity": 58,
+      "requiredScrews": 3
+    },
+    {
+      "id": 10,
+      "colorId": 9,
+      "capacity": 58,
       "requiredScrews": 3
     }
   ],
   "queueColumns": [
     {
       "columnIndex": 0,
-      "rimColorId": 8,
+      "rimColorId": 5,
       "items": [
-        {
-          "colorId": 8
-        },
-        {
-          "colorId": 7
-        },
         {
           "colorId": 9
         },
         {
-          "colorId": 8,
-          "isMystery": true
+          "colorId": 11
         },
         {
-          "colorId": 10
-        },
-        {
-          "colorId": 5
-        }
-      ]
-    },
-    {
-      "columnIndex": 1,
-      "rimColorId": 7,
-      "items": [
-        {
-          "colorId": 7
-        },
-        {
-          "colorId": 8
-        },
-        {
-          "colorId": 7
+          "colorId": 3
         },
         {
           "colorId": 9,
@@ -285,82 +620,107 @@
           "colorId": 5
         },
         {
-          "colorId": 10
+          "colorId": 9
+        }
+      ]
+    },
+    {
+      "columnIndex": 1,
+      "rimColorId": 9,
+      "items": [
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 5
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 9,
+          "isMystery": true
+        },
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 9
         }
       ]
     },
     {
       "columnIndex": 2,
-      "rimColorId": 9,
+      "rimColorId": 6,
       "items": [
-        {
-          "colorId": 8
-        },
         {
           "colorId": 9
         },
         {
-          "colorId": 7
+          "colorId": 5
         },
         {
-          "colorId": 10,
+          "colorId": 6
+        },
+        {
+          "colorId": 9,
           "isMystery": true
         },
         {
           "colorId": 9
         },
         {
-          "colorId": 5
+          "colorId": 9
         }
       ]
     },
     {
       "columnIndex": 3,
-      "rimColorId": 10,
+      "rimColorId": 11,
       "items": [
         {
-          "colorId": 7
+          "colorId": 11
+        },
+        {
+          "colorId": 5
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 5,
+          "isMystery": true
         },
         {
           "colorId": 9
         },
         {
-          "colorId": 8
-        },
-        {
-          "colorId": 10,
-          "isMystery": true
-        },
-        {
-          "colorId": 5
-        },
-        {
-          "colorId": 5
+          "colorId": 9
         }
       ]
     },
     {
       "columnIndex": 4,
-      "rimColorId": 5,
+      "rimColorId": 3,
       "items": [
+        {
+          "colorId": 11
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 5,
+          "isMystery": true
+        },
         {
           "colorId": 9
         },
         {
-          "colorId": 8
-        },
-        {
-          "colorId": 10
-        },
-        {
-          "colorId": 7,
-          "isMystery": true
-        },
-        {
-          "colorId": 10
-        },
-        {
-          "colorId": 5
+          "colorId": 9
         }
       ]
     }

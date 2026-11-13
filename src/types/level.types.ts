@@ -94,21 +94,26 @@ export interface LevelData {
   queueColumns: QueueColumnDef[];
 }
 
+/** UI languages shipped in `src/i18n`. */
+export type LanguageCode = 'vi' | 'en';
+
+/** Keys of the persistent booster inventory. */
+export type BoosterKey = 'extraSlot' | 'hand' | 'shuffle';
+
+/** Player preferences persisted in {@link SaveData.settings}. */
+export interface SaveSettings {
+  soundEnabled: boolean;
+  musicEnabled: boolean;
+  vibrationEnabled: boolean;
+  language: LanguageCode;
+}
+
 export interface SaveData {
   version: 1;
   currentLevel: number;
   coins: number;
-  boosters: {
-    extraSlot: number;
-    hand: number;
-    shuffle: number;
-  };
-  settings: {
-    soundEnabled: boolean;
-    musicEnabled: boolean;
-    vibrationEnabled: boolean;
-    language: 'vi' | 'en';
-  };
+  boosters: Record<BoosterKey, number>;
+  settings: SaveSettings;
   completedLevels: Record<number, { stars: number; bestTimeSec: number }>;
 }
 
