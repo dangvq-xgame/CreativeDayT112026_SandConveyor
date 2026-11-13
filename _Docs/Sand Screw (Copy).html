@@ -1,0 +1,257 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sand Screw (Copy)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+<style>
+/* Layout: portrait puzzle. Top ~40%: a cluster of 3D yarn balls. A row of spool docks. Bottom: a mat packed with spools (arrow out): tap one with a clear way out, it rolls off and docks, then pulls thread of its colour off the outer layer of the balls. */
+:root{--bg:#bfe3fb;--accent:#ff7a59;--accent-d:#d4553a;--accent-l:#ffa184;--display:'Fredoka','Arial Rounded MT Bold',system-ui,sans-serif}
+html,body{height:100%}
+body{background:var(--bg);color:#fff;font-family:var(--display);overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.app{height:100%;max-width:500px;margin:0 auto;display:flex;flex-direction:column}
+.stage{position:relative;flex:1;min-height:0;overflow:hidden}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;z-index:3;top:10px;left:max(14px,env(safe-area-inset-left,0px));right:max(14px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;pointer-events:none}
+.hud>*{pointer-events:auto}
+.rb{position:relative;width:44px;height:44px;border-radius:14px;border:0;background:linear-gradient(180deg,var(--accent-l),var(--accent));box-shadow:0 4px 0 var(--accent-d),inset 0 2px 0 rgba(255,255,255,.5);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+.rb svg{width:22px;height:22px}.rb:active{transform:translateY(2px);box-shadow:0 2px 0 var(--accent-d)}.rb:disabled{filter:grayscale(1);opacity:.55}
+.rb .n{position:absolute;right:-6px;bottom:-6px;min-width:20px;height:20px;border-radius:10px;background:#fff;color:var(--accent-d);font:700 12px/20px var(--display);text-align:center}
+.rb:focus-visible,.cta:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.mid{display:flex;flex-direction:column;align-items:center;gap:4px}
+.lvl{font-size:20px;font-weight:700;background:rgba(0,0,0,.28);padding:3px 16px;border-radius:12px}
+.prog{width:120px;height:9px;border-radius:5px;background:rgba(255,255,255,.2);overflow:hidden}.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff7a59,#ffd43b);transition:width .2s}
+.hint{position:absolute;z-index:2;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));font-size:13px;font-weight:600;background:rgba(0,0,0,.55);padding:7px 13px;border-radius:999px;white-space:nowrap;pointer-events:none;transition:opacity .4s}
+.overlay{position:absolute;inset:0;z-index:4;display:grid;place-items:center;background:rgba(20,12,40,.55)}
+.card{background:#fff;color:#3b2a5c;border-radius:22px;padding:20px 22px 22px;text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center;width:min(300px,84%);box-shadow:0 8px 0 #d8ccef}
+.card .ey{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8a78ad}.card h2{margin:0;font-size:28px}.card p{margin:0;color:#8a78ad;font-size:14px}
+.btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.cta{border:0;border-radius:14px;padding:11px 20px;font:700 17px var(--display);color:#fff;background:linear-gradient(180deg,var(--accent-l),var(--accent));box-shadow:0 5px 0 var(--accent-d);cursor:pointer}
+.cta.alt{background:linear-gradient(180deg,#7fd36e,#3fb14f);box-shadow:0 5px 0 #2a7f37}
+[hidden]{display:none!important}
+</style>
+<div class="app"><div class="stage" id="stage">
+  <header class="hud">
+    <button class="rb" id="restart" aria-label="Restart level"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
+    <div class="mid"><div class="lvl" id="lvl">Level 1</div><div class="prog"><i id="pg"></i></div></div>
+    <button class="rb" id="plus" aria-label="Booster: add a jar to the belt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="n" id="pn">1</span></button>
+  </header>
+  <canvas id="cv"></canvas>
+  <div class="hint" id="hint">Tap a tube to pop its top vial</div>
+  <div class="overlay" id="ov" hidden><div class="card"><span class="ey" id="ovEy"></span><h2 id="ovT"></h2><p id="ovP"></p><div class="btns"><button class="cta alt" id="ovAlt" hidden></button><button class="cta" id="ovBtn"></button></div></div></div>
+</div></div>
+<script>
+(()=>{
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),stage=document.getElementById('stage'),$=id=>document.getElementById(id);
+const hx=h=>{const n=parseInt(h.slice(1),16);return[n>>16&255,n>>8&255,n&255]};
+const mix=(h,t,k)=>{const a=hx(h),b=hx(t);return`rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*k)).join(',')})`};
+function rr(g,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+let rnd=Math.random;function seeded(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let VT=null;const NOW=()=>VT!=null?VT:performance.now();
+
+/* ---------- audio ---------- */
+let AC=null;function ensureAudio(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+function tone(f0,f1,d,type='sine',v=.08,dl=0){if(!AC)return;const t=AC.currentTime+dl,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}
+let tickT=0;const tick=f=>{const n=performance.now();if(n-tickT<30)return;tickT=n;tone(f,f*1.3,.04,'triangle',.03)};
+
+const PAL={R:'#f0524f',O:'#ff9a3c',Y:'#f7c843',G:'#5cc46a',C:'#45c4e6',B:'#4d6fe8',V:'#a070ec',K:'#f27bb8'};
+
+/* ---------- level: a sand picture of wavy strata; jars drain the bottom row; screws on stacked glass plates fill the jars ---------- */
+function spec(n){if(n===1)return{GW:14,GH:10,k:2,A:20,open:2};if(n===2)return{GW:18,GH:13,k:3,A:22,open:2};if(n<=4)return{GW:20,GH:15,k:4,A:24,open:2};return{GW:22,GH:16,k:5,A:26,open:2}}
+function genLevel(n){rnd=seeded(n*389+17);const sp=spec(n),cols=shuffle(Object.keys(PAL)).slice(0,sp.k),{GW,GH}=sp;
+  // wavy bands, like layered sand art in a bottle
+  const g=[...Array(GH)].map(()=>Array(GW).fill(null));const bands=sp.k+1+((rnd()*2)|0),ph=[...Array(bands)].map(()=>rnd()*6.28),amp=[...Array(bands)].map(()=>.6+rnd()*1.6),fr=[...Array(bands)].map(()=>.25+rnd()*.35);
+  for(let x=0;x<GW;x++){const bounds=[];for(let b=1;b<bands;b++)bounds.push(GH*b/bands+amp[b]*Math.sin(x*fr[b]+ph[b]));
+    for(let y=0;y<GH;y++){let b=0;while(b<bounds.length&&y>=bounds[b])b++;g[y][x]=cols[(b+(b>=cols.length?1:0))%cols.length]}}
+  // jar order: drain the bottom row, one jar at a time (columns drop straight down)
+  const sim=g.map(r=>r.slice()),low=x=>{for(let y=GH-1;y>=0;y--)if(sim[y][x])return y;return -1};
+  const pull=c=>{for(let x=0;x<GW;x++){const y=low(x);if(y>=0&&sim[y][x]===c){sim[y][x]=null;for(let yy=y;yy>0;yy--)sim[yy][x]=sim[yy-1][x];sim[0][x]=null;return true}}return false};
+  const jars=[];for(let guard=0;guard<500;guard++){const bot={};let left=0;for(let x=0;x<GW;x++){const y=low(x);if(y>=0){bot[sim[y][x]]=(bot[sim[y][x]]||0)+1;left++}}if(!left)break;
+    const c=Object.keys(bot).sort((a,b)=>bot[b]-bot[a]+(rnd()-.5))[0];let a=0;while(a<sp.A&&pull(c))a++;jars.push({c,amt:a})}
+  // stack tubes: a fixed rack of glass tubes. Each vial is dealt to the bottom of a random tube in jar order,
+  // so popping tops in jar order is always possible; the level grows in depth, never in area
+  const colSeq=[];jars.forEach(j=>colSeq.push(j.c,j.c,j.c));
+  for(let b=0;b<colSeq.length;b+=6){const blk=shuffle(colSeq.slice(b,b+6));for(let i=0;i<blk.length;i++)colSeq[b+i]=blk[i]}
+  const NT=n===1?4:n===2?5:6,tubes=[...Array(NT)].map(()=>[]);
+  let ci=0;colSeq.forEach(c=>{const mn=Math.min(...tubes.map(t=>t.length)),ok=tubes.filter(t=>t.length<=mn+1);ok[(rnd()*ok.length)|0].push({c,idx:ci++})});
+  return{g,GW,GH,jars,tubes,open:sp.open}}
+
+/* ---------- state ---------- */
+let W=0,H=0,dpr=1,L={},S=null,parts=[],texts=[],fly=[],grains=[];
+function newLevel(n){const lv=genLevel(n);
+  S={n,g:lv.g.map(r=>r.map(c=>c?{c,off:0,vy:0}:null)),GW:lv.GW,GH:lv.GH,queue:lv.jars.map(j=>({...j,holes:[],got:0})),slots:Array(4).fill(null),open:lv.open,tubes:lv.tubes,vials:lv.tubes.flat(),buffer:Array(5).fill(null),
+     total:lv.jars.reduce((a,j)=>a+j.amt,0),done:0,over:false,won:false,boost:1,cont:1,first:n===1,pullNext:0,seq:0,leaving:[]};
+  for(const v of S.vials)v.state='in';
+  parts=[];texts=[];fly=[];grains=[];$('ov').hidden=true;$('lvl').textContent='Level '+n;$('hint').style.opacity=S.first?1:0;layout();refill(true);hud()}
+function layout(){const r=stage.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(2,window.devicePixelRatio||1);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  L.top=60;const fh=H*.3;L.cs=Math.floor(Math.min((W-60)/S.GW,(fh-20)/S.GH));L.fx=Math.round((W-S.GW*L.cs)/2);L.fy=L.top+8;L.fb=L.fy+S.GH*L.cs;
+  L.jarY=L.fb+H*.075;L.jarW=Math.min(80,(W-30)/4.4);L.bufY=L.jarY+L.jarW*.95;L.bufS=Math.min(34,(W-60)/6);
+  L.zx=16;L.zy=L.bufY+L.bufS+18;L.zw=W-32;L.zh=H-L.zy-16;
+  const NT=S.tubes.length;L.vis=3;L.tw=Math.min(78,(L.zw-10)/NT*.84,(L.zh-34)/(3*.774+.42));L.tr=L.tw*.36;L.step=L.tr*2.15;
+  L.bx0=6;L.bx1=W-6;L.arch=L.jarW*.5;L.va=L.bx0+L.arch*.55;L.vb=L.bx1-L.arch*.55;L.ta=L.va-L.jarW*.5;L.tb=L.vb+L.jarW*.5}
+const tubeX=t=>W/2+(t-(S.tubes.length-1)/2)*(L.zw-10)/S.tubes.length;const rowY=k=>L.zy+L.tw*.42+k*L.step+L.tr;
+const BELT_SPD=34,PH=[.12,.62,.37,.87];
+const slotX=(i,now)=>{const Lb=L.tb-L.ta;return L.ta+((PH[i]*Lb+now/1000*BELT_SPD)%Lb)};
+const hiddenX=x=>x<=L.va-L.jarW*.44||x>=L.vb+L.jarW*.44;
+const jarX=i=>S.slots[i]&&S.slots[i].vx!=null?S.slots[i].vx:slotX(i,NOW());const bufX=i=>W/2+(i-2)*L.bufS*1.3;
+const PX=s=>L.zx+s.X*L.zw,PY=s=>L.zy+s.Y*L.zh;
+const HOLE_DY=.04;const holeXY=(i,h)=>[jarX(i)+(h-1)*L.jarW*.24,L.jarY+L.jarW*HOLE_DY];const holeOf=(j,h)=>[(j.vx!=null?j.vx:jarX(S.slots.indexOf(j)))+(h-1)*L.jarW*.24,L.jarY+L.jarW*HOLE_DY];
+const BELT_V=60;
+// a new jar is only loaded onto a slot while that slot is hidden inside a tunnel, so it rolls out on the belt
+function refill(force){const now=NOW();for(let i=0;i<S.open;i++)if(!S.slots[i]&&S.queue.length&&(force||hiddenX(slotX(i,now)))){const j=S.queue.shift();j.t0=now;j.seq=++S.seq;j.vx=slotX(i,now);S.slots[i]=j}}
+
+/* ---------- drawing ---------- */
+function grainBlock(x,y,s,col,seed){ctx.fillStyle=col;ctx.fillRect(x,y,s+.5,s+.5);ctx.fillStyle=mix(col,'#000000',.18);
+  for(let i=0;i<3;i++){const a=(seed*9301+i*49297)%233280/233280,b=(seed*7919+i*1237)%233280/233280;ctx.fillRect(x+a*s*.8,y+b*s*.8,Math.max(1,s*.16),Math.max(1,s*.16))}
+  ctx.fillStyle=mix(col,'#ffffff',.25);const a=(seed*4111)%997/997;ctx.fillRect(x+a*s*.7,y+(1-a)*s*.6,Math.max(1,s*.14),Math.max(1,s*.14))}
+function screwHead(x,y,r,c,o={}){ctx.save();ctx.translate(x,y);if(o.rot)ctx.rotate(o.rot);if(o.alpha!=null)ctx.globalAlpha=o.alpha;
+  ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.arc(r*.12,r*.25,r*1.08,0,7);ctx.fill();
+  // glass rim with coloured sand showing through
+  ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.arc(0,0,r*1.05,0,7);ctx.fill();
+  const g=ctx.createRadialGradient(-r*.3,-r*.3,r*.1,0,0,r);g.addColorStop(0,mix(PAL[c],'#ffffff',.35));g.addColorStop(1,mix(PAL[c],'#000000',.2));ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,r*.9,0,7);ctx.fill();
+  ctx.fillStyle=mix(PAL[c],'#000000',.25);for(let k=0;k<6;k++){const a=k*1.05+.4,d=r*(.5+(k%2)*.2);ctx.fillRect(Math.cos(a)*d-1,Math.sin(a)*d-1,2,2)}
+  // screw cap with grip ridges
+  ctx.fillStyle='#b98552';ctx.beginPath();ctx.arc(0,0,r*.5,0,7);ctx.fill();ctx.strokeStyle='#8a5d32';ctx.lineWidth=1;for(let k=0;k<10;k++){const a=k*.628;ctx.beginPath();ctx.moveTo(Math.cos(a)*r*.36,Math.sin(a)*r*.36);ctx.lineTo(Math.cos(a)*r*.5,Math.sin(a)*r*.5);ctx.stroke()}
+  ctx.fillStyle='#d6a673';ctx.beginPath();ctx.arc(-r*.08,-r*.08,r*.3,0,7);ctx.fill();ctx.restore()}
+const OPEN_TWIST=260,OPEN_FLIP=430,OPEN_MS=820;
+function padlock(x,y,s,sh,rot,al){ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.globalAlpha=Math.max(0,al);
+  ctx.strokeStyle='#a9b1c4';ctx.lineWidth=s*.3;ctx.lineCap='round';ctx.beginPath();const sy=-s*.35-sh*s*.55;
+  ctx.moveTo(s*.42,-s*.25);ctx.lineTo(s*.42,sy);ctx.arc(0,sy,s*.42,0,Math.PI,true);ctx.lineTo(-s*.42,sy+s*.25+(1-sh)*s*.35);ctx.stroke();
+  const g=ctx.createLinearGradient(0,-s*.35,0,s*.8);g.addColorStop(0,'#ffe27a');g.addColorStop(1,'#e8a412');ctx.fillStyle=g;rr(ctx,-s*.68,-s*.35,s*1.36,s*1.1,s*.28);ctx.fill();
+  ctx.strokeStyle='#b07800';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#5a3b00';ctx.beginPath();ctx.arc(0,s*.1,s*.15,0,7);ctx.fill();ctx.fillRect(-s*.06,s*.1,s*.12,s*.3);
+  ctx.restore()}
+function jar(x,y,w,j,now){const h=w*.95,c=PAL[j.c];
+  const OP=j.openT!=null?now-j.openT:-1;let ang=0,lift=0,shx=0;
+  if(OP>=0){if(OP<OPEN_TWIST)shx=Math.sin(OP/OPEN_TWIST*Math.PI*6)*w*.018;
+    if(OP>=OPEN_FLIP){const q=Math.min(1,(OP-OPEN_FLIP)/380),eb=1+2.7*Math.pow(q-1,3)+1.7*Math.pow(q-1,2);ang=-1.95*eb;lift=Math.sin(q*Math.PI)*h*.08}}
+  x+=shx;
+  ctx.fillStyle='rgba(0,0,0,.15)';ctx.beginPath();ctx.ellipse(x,y+h*.5,w*.42,w*.08,0,0,7);ctx.fill();
+  // body
+  const bg=ctx.createLinearGradient(0,y-h*.32,0,y+h*.48);bg.addColorStop(0,mix(c,'#ffffff',.38));bg.addColorStop(1,mix(c,'#000000',.08));
+  rr(ctx,x-w*.43,y-h*.3,w*.86,h*.8,w*.16);ctx.fillStyle=mix(c,'#000000',.25);ctx.fill();
+  rr(ctx,x-w*.43,y-h*.33,w*.86,h*.78,w*.16);ctx.fillStyle=bg;ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.35)';rr(ctx,x-w*.36,y-h*.29,w*.08,h*.5,w*.04);ctx.fill();
+  // open mouth with the sand heap rising as the jar fills
+  const f=j.amt?j.got/j.amt:0;
+  if(OP>=OPEN_FLIP){ctx.fillStyle=mix(c,'#000000',.5);ctx.beginPath();ctx.ellipse(x,y-h*.33,w*.37,w*.08,0,0,7);ctx.fill();
+    if(f>0){ctx.save();ctx.beginPath();ctx.ellipse(x,y-h*.33,w*.37,w*.08,0,0,7);ctx.rect(x-w*.37,y-h*.33-w*.2,w*.74,w*.2);ctx.clip();
+      const sh=w*.03+f*w*.13;ctx.fillStyle=mix(c,'#ffffff',.15);ctx.beginPath();ctx.ellipse(x,y-h*.33+w*.02,w*.34,sh,0,Math.PI,0);ctx.fill();
+      ctx.fillStyle=mix(c,'#ffffff',.45);for(let k=0;k<7;k++){const a=k*.9+.3;ctx.fillRect(x+Math.cos(a)*w*.22-1,y-h*.33-Math.abs(Math.sin(a))*sh*.6,2,2)}ctx.restore()}
+    const gl=Math.max(0,1-(OP-OPEN_FLIP)/700);if(gl>0){ctx.globalAlpha=gl*.7;const gg=ctx.createRadialGradient(x,y-h*.35,2,x,y-h*.35,w*.6);gg.addColorStop(0,'#ffffff');gg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(x,y-h*.35,w*.6,0,7);ctx.fill();ctx.globalAlpha=1}}
+  // screw-lock strip along the body: 3 seats; the lid stays shut until all 3 are filled
+  const sy=y+h*HOLE_DY/.95;rr(ctx,x-w*.4,sy-h*.14,w*.8,h*.28,h*.14);ctx.fillStyle='#d9f0ff';ctx.fill();ctx.strokeStyle=mix(c,'#000000',.3);ctx.lineWidth=2;ctx.stroke();
+  for(let k=0;k<3;k++){const hx=x+(k-1)*w*.24;ctx.fillStyle='#2f4f86';ctx.beginPath();ctx.arc(hx,sy,w*.085,0,7);ctx.fill();ctx.fillStyle='#4b7cc7';ctx.beginPath();ctx.arc(hx,sy+1,w*.06,0,7);ctx.fill();const sc=j.holes[k];
+    if(sc&&sc.landed){const st=sc.landT!=null?Math.min(1,(now-sc.landT)/240):1;let rot=-(1-st)*7,sz=1+Math.sin(st*Math.PI)*.18;if(OP>=0)rot+=Math.min(1,OP/OPEN_TWIST)*Math.PI*2.5;
+      screwHead(hx,sy,w*.09*sz,j.c,{rot})}}
+  // percentage label
+  const py=y+h*.33;rr(ctx,x-w*.27,py-h*.09,w*.54,h*.18,h*.09);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fill();
+  ctx.fillStyle='#24325c';ctx.font=`700 ${Math.round(w*.17)}px Fredoka,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.round(f*100)+'%',x,py+1);ctx.textBaseline='alphabetic';
+  // lid: flips open on its hinge once the strip is full
+  ctx.save();const hgx=x-w*.46,hgy=y-h*.38;ctx.translate(hgx,hgy-lift);ctx.rotate(ang);ctx.translate(-hgx,-hgy);
+  rr(ctx,x-w*.47,y-h*.47,w*.94,h*.18,w*.08);ctx.fillStyle=mix(c,'#000000',.22);ctx.fill();rr(ctx,x-w*.47,y-h*.5,w*.94,h*.17,w*.08);ctx.fillStyle=c;ctx.fill();
+  ctx.fillStyle=mix(c,'#ffffff',.4);rr(ctx,x-w*.4,y-h*.49,w*.8,h*.04,w*.02);ctx.fill();
+  ctx.restore();
+  if(j.active&&!j.doneT&&j.waiting){ctx.fillStyle='rgba(60,40,90,.75)';ctx.font=`600 10px Fredoka,sans-serif`;ctx.textAlign='center';ctx.fillText('waiting',x,y+h*.66)}}
+
+/* ---------- logic ---------- */
+const inside=(p,X,Y)=>X>=p.x&&X<=p.x+p.w&&Y>=p.y&&Y<=p.y+p.h;
+const REVEAL=3;
+function target(c){for(let i=0;i<S.open;i++){const j=S.slots[i];if(j&&j.c===c&&!j.active){const h=[0,1,2].find(k=>!j.holes[k]);if(h!=null)return{jar:j,i,h}}}return null}
+function tapTube(ti){if(S.over)return;const tube=S.tubes[ti];if(!tube.length)return;ensureAudio();const now=NOW(),s=tube[0];
+  const t=target(s.c);let to;
+  if(t){t.jar.holes[t.h]=s;s.jar=t.jar;s.hole=t.h;to=holeXY(t.i,t.h)}
+  else{const b=S.buffer.indexOf(null);if(b<0){S.bonkT=ti;S.bonk=now;S.over=true;setTimeout(lose,250);return}S.buffer[b]=s;to=[bufX(b),L.bufY]}
+  tube.shift();s.state='fly';s.t0=now;s.from=[tubeX(ti),rowY(0)];s.to=to;S.drop=S.drop||{};S.drop[ti]=now;tone(700,1100,.08,'triangle',.06);if(S.first){S.first=false;$('hint').style.opacity=0}}
+function hud(){$('pg').style.width=(S.done/S.total*100)+'%';$('pn').textContent=S.boost;$('plus').disabled=S.boost<=0||S.open>=4}
+function addSlot(){if(S.open>=4)return false;S.open++;refill();tone(660,990,.2,'triangle',.06);return true}
+function win(){S.over=true;$('ovEy').textContent='Picture drained';$('ovT').textContent='All sand collected!';$('ovP').textContent='Every grain found its jar.';$('ovAlt').hidden=true;$('ovBtn').textContent='Next level';$('ovBtn').onclick=()=>newLevel(S.n+1);$('ov').hidden=false;[523,659,784,1047].forEach((f,i)=>tone(f,f,.3,'triangle',.07,i*.09))}
+function lose(){$('ovEy').textContent='Vial rack full';$('ovT').textContent='Out of space!';$('ovP').textContent=`${Math.floor(S.done/S.total*100)}% drained. The vial rack filled up.`;
+  $('ovAlt').hidden=!(S.cont>0&&S.buffer.length<7);$('ovAlt').textContent='+1 hole & continue';$('ovAlt').onclick=()=>{S.cont--;S.buffer.push(null);S.over=false;$('ov').hidden=true};
+  $('ovBtn').textContent='Retry';$('ovBtn').onclick=()=>newLevel(S.n);$('ov').hidden=false;tone(300,160,.4,'triangle',.06)}
+function lowest(x){for(let y=S.GH-1;y>=0;y--)if(S.g[y][x])return y;return -1}
+
+/* ---------- loop ---------- */
+function update(now,dt){
+  // screws in flight land in their hole
+  for(const s of S.vials)if(s.state==='fly'&&now-s.t0>=420){s.state=s.jar?'jar':'buf';s.landed=true;s.landT=now;tone(1200,900,.05,'square',.03)}
+  // holder screws move into a matching jar when one has room
+  for(let b=0;b<S.buffer.length;b++){const s=S.buffer[b];if(!s||s.state!=='buf')continue;const t=target(s.c);if(t){S.buffer[b]=null;t.jar.holes[t.h]=s;s.jar=t.jar;s.hole=t.h;s.state='fly';s.landed=false;s.t0=now;s.from=[bufX(b),L.bufY];s.to=holeXY(t.i,t.h)}}
+  // a jar with 3 screws seated starts draining (oldest first); it pulls from the bottom row of the picture
+  for(let i=0;i<S.open;i++){const j=S.slots[i];if(j&&!j.active&&j.holes.filter(h=>h&&h.landed&&h.state==='jar').length===3){j.active=true;j.openT=now;tone(900,1300,.05,'square',.04);tone(1100,1500,.05,'square',.04,.09);tone(1500,800,.07,'square',.05,.26);tone(500,980,.16,'triangle',.07,.43);const jx=jarX(i),jy=L.jarY-L.jarW*.45;setTimeout(()=>{for(let p=0;p<18;p++){const a=Math.random()*6.28,v=80+Math.random()*160;parts.push({x:jx,y:jy,vx:Math.cos(a)*v,vy:Math.sin(a)*v-160,life:.7,max:.7,col:p%3?PAL[j.c]:'#ffffff'})}},430)}}
+  if(now>=S.pullNext){const act=S.slots.filter(j=>j&&j.active&&!j.doneT&&now-j.openT>=OPEN_MS).sort((a,b)=>a.seq-b.seq);
+    // jars drain strictly in queue order, so the picture empties exactly as planned
+    const firstSeq=Math.min(...S.slots.filter(j=>j&&!j.doneT).map(j=>j.seq));
+    for(const j of act){if(j.seq!==firstSeq){j.waiting=true;continue}let hit=-1;for(let x=0;x<S.GW;x++){const y=lowest(x);if(y>=0&&S.g[y][x].c===j.c){hit=x;break}}
+      if(hit<0){j.waiting=true;continue}j.waiting=false;const y=lowest(hit),cell=S.g[y][hit];S.g[y][hit]=null;
+      // everything above drops
+      for(let yy=y;yy>0;yy--){S.g[yy][hit]=S.g[yy-1][hit];if(S.g[yy][hit]){S.g[yy][hit].off-=L.cs}}S.g[0][hit]=null;
+      j.got++;S.done++;hud();const i=S.slots.indexOf(j);grains.push({x:L.fx+(hit+.5)*L.cs,y:L.fb-L.cs*.5,tx:j.vx,ty:L.jarY-L.jarW*.2,t0:now,c:j.c});if(Math.random()<.5)tone(1400+Math.random()*400,1000,.03,'sine',.015);
+      if(j.got>=j.amt){j.doneT=now;tone(784,1200,.15,'triangle',.06)}S.pullNext=now+Math.max(14,700/j.amt);break}}
+  // jars follow the belt; a finished jar rides on into the right tunnel and leaves there
+  for(let i=0;i<S.open;i++){const x=slotX(i,now),j=S.slots[i];if(j){const wrapped=j.vx!=null&&x<j.vx-L.jarW;j.vx=x;if(j.doneT&&now-j.doneT>350&&(wrapped||x>=L.vb+L.jarW*.44))S.slots[i]=null}}
+  refill();
+  for(let y=0;y<S.GH;y++)for(let x=0;x<S.GW;x++){const c=S.g[y][x];if(c&&c.off<0){c.vy+=2200*dt;c.off=Math.min(0,c.off+c.vy*dt);if(!c.off)c.vy=0}}
+  for(let i=grains.length-1;i>=0;i--)if(now-grains[i].t0>380)grains.splice(i,1);
+  if(!S.won&&S.done>=S.total){S.won=true;S.over=true;setTimeout(win,700)}
+  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;if(p.life<=0){parts.splice(i,1);continue}p.vy+=500*dt;p.x+=p.vx*dt;p.y+=p.vy*dt}}
+function render(now){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#bfe3fb';ctx.fillRect(0,0,W,H);
+  // sand frame
+  const fw=S.GW*L.cs,fh=S.GH*L.cs;ctx.fillStyle='#7f9bd6';rr(ctx,L.fx-12,L.fy-10,fw+24,fh+24,14);ctx.fill();ctx.fillStyle='#eef4ff';rr(ctx,L.fx-6,L.fy-6,fw+12,fh+12,8);ctx.fill();
+  for(let y=0;y<S.GH;y++)for(let x=0;x<S.GW;x++){const c=S.g[y][x];if(!c)continue;grainBlock(L.fx+x*L.cs,L.fy+y*L.cs+c.off,L.cs,PAL[c.c],x*131+y*7+(c.c.charCodeAt(0)))}
+  ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(L.fx,L.fy,fw*.06,fh);
+  // drain streams
+  for(const g of grains){const e=Math.min(1,(now-g.t0)/380);const x=g.x+(g.tx-g.x)*e,y=g.y+(g.ty-g.y)*e+Math.sin(e*Math.PI)*-20;ctx.fillStyle=PAL[g.c];ctx.fillRect(x-2,y-2,4,4);ctx.globalAlpha=.4;ctx.fillRect(x-1.5,y-12*(1-e),3,10);ctx.globalAlpha=1}
+  // jar conveyor: a belt running right-to-left under the jars
+  {const by=L.jarY+L.jarW*.47,bh=L.jarW*.24,x0=6,x1=W-6,r=bh/2;
+   ctx.fillStyle='rgba(40,60,110,.2)';rr(ctx,x0,by+4,x1-x0,bh,r);ctx.fill();
+   rr(ctx,x0,by,x1-x0,bh,r);ctx.fillStyle='#4a5878';ctx.fill();rr(ctx,x0+3,by+2,x1-x0-6,bh-4,r-2);ctx.fillStyle='#5f6f93';ctx.fill();
+   ctx.save();rr(ctx,x0+3,by+2,x1-x0-6,bh-4,r-2);ctx.clip();ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=2;const gap=12,ph=(now/1000*BELT_V)%gap;
+   for(let x=x0-gap+(now/1000*BELT_SPD)%gap;x<x1+gap;x+=gap){ctx.beginPath();ctx.moveTo(x,by+2);ctx.lineTo(x+3,by+bh-2);ctx.stroke()}ctx.restore();
+   for(const cx of [x0+r,x1-r]){ctx.fillStyle='#d3dbea';ctx.beginPath();ctx.arc(cx,by+r,r*.62,0,7);ctx.fill();ctx.save();ctx.translate(cx,by+r);ctx.rotate(now/1000*BELT_SPD/(r*.62));ctx.strokeStyle='#8794b0';ctx.lineWidth=2;for(let k=0;k<3;k++){ctx.rotate(2.09);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(r*.5,0);ctx.stroke()}ctx.restore()}
+   // a chute arrow at the exit end
+   ctx.fillStyle='#ffc93a';ctx.font=`700 13px Fredoka,sans-serif`;ctx.textAlign='center';for(const ax of [W*.3,W*.7])ctx.fillText('»',ax,by+r+5)}
+  // jars are clipped at the tunnel mouths so they slide in and out of them
+  ctx.save();ctx.beginPath();ctx.rect(L.va,0,L.vb-L.va,H);ctx.clip();
+  for(let i=0;i<S.open;i++){const j=S.slots[i];if(!j)continue;jar(j.vx!=null?j.vx:slotX(i,now),L.jarY,L.jarW,j,now)}
+  ctx.restore();
+  // tunnels at both ends of the belt: jars disappear into the right one and roll out of the left one
+  {const by=L.jarY+L.jarW*.47,bh=L.jarW*.24,aw=L.arch,ah=L.jarW*1.12;
+   for(const [ax,side] of [[L.bx0,1],[L.bx1-aw,-1]]){const top=by+bh-ah;
+     ctx.fillStyle='rgba(40,60,110,.18)';rr(ctx,ax+3,top+4,aw,ah,aw*.48);ctx.fill();
+     const ag=ctx.createLinearGradient(ax,0,ax+aw,0);ag.addColorStop(0,'#e3e8fb');ag.addColorStop(1,'#b9c2ea');ctx.fillStyle=ag;rr(ctx,ax,top,aw,ah,aw*.48);ctx.fill();
+     ctx.fillStyle='#3d4672';const mx=side>0?ax+aw*.55:ax;rr(ctx,mx,top+aw*.3,aw*.45,ah-aw*.3,aw*.2);ctx.fill();
+     ctx.fillStyle='rgba(255,255,255,.55)';rr(ctx,ax+aw*.06,top+aw*.2,aw*.08,ah*.6,aw*.04);ctx.fill()}}
+  // screw holder
+  ctx.fillStyle='#ffffff';rr(ctx,bufX(0)-L.bufS*.75,L.bufY-L.bufS*.55,bufX(S.buffer.length-1)-bufX(0)+L.bufS*1.5,L.bufS*1.1,L.bufS*.55);ctx.fill();
+  for(let b=0;b<S.buffer.length;b++){ctx.fillStyle='#c9d3e6';ctx.beginPath();ctx.arc(bufX(b),L.bufY,L.bufS*.32,0,7);ctx.fill();const s=S.buffer[b];if(s&&s.landed&&s.state==='buf')screwHead(bufX(b),L.bufY,L.bufS*.36,s.c)}
+  // the tube rack: fixed size, deeper levels just mean taller hidden stacks
+  {const y0=L.zy,h=L.zh;ctx.fillStyle='#9cbbe6';rr(ctx,L.zx,y0+h-14,L.zw,14,7);ctx.fill();
+   for(let t=0;t<S.tubes.length;t++){const x=tubeX(t),tw=L.tw,tube=S.tubes[t],bh=L.vis*L.step+tw*.42+8,dk=S.drop&&now-S.drop[t]<200?(1-(now-S.drop[t])/200)*L.step:0;
+     ctx.fillStyle='rgba(40,60,110,.15)';rr(ctx,x-tw/2+4,y0+6,tw,bh,tw*.45);ctx.fill();
+     rr(ctx,x-tw/2,y0,tw,bh,tw*.45);ctx.fillStyle='rgba(255,255,255,.42)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=2.5;ctx.stroke();
+     ctx.fillStyle='#ffffff';rr(ctx,x-tw/2-4,y0-4,tw+8,9,4);ctx.fill();
+     const shk=S.bonk&&S.bonkT===t&&now-S.bonk<260?Math.sin((now-S.bonk)/260*Math.PI*5)*2:0;
+     for(let k=0;k<Math.min(tube.length,L.vis);k++){const v=tube[k],y=rowY(k)+dk,hid=k>=REVEAL;
+       if(hid){ctx.fillStyle='#8a95b0';ctx.beginPath();ctx.arc(x,y,L.tr*1.02,0,7);ctx.fill();ctx.fillStyle='#a9b3cb';ctx.beginPath();ctx.arc(x-L.tr*.15,y-L.tr*.15,L.tr*.8,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font=`700 ${Math.round(L.tr)}px Fredoka,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('?',x,y+1);ctx.textBaseline='alphabetic'}
+       else screwHead(x+(k===0?shk:0),y,L.tr,v.c)}
+     ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-tw*.3,y0+tw*.4);ctx.lineTo(x-tw*.3,y0+bh-tw*.4);ctx.stroke();
+     const more=tube.length-L.vis;if(more>0){ctx.fillStyle='#4a5878';rr(ctx,x-tw*.36,y0+bh-4,tw*.72,18,9);ctx.fill();ctx.fillStyle='#fff';ctx.font=`700 11px Fredoka,sans-serif`;ctx.textAlign='center';ctx.fillText('+'+more,x,y0+bh+9)}
+     else if(!tube.length){ctx.fillStyle='rgba(74,88,120,.5)';ctx.font=`600 11px Fredoka,sans-serif`;ctx.textAlign='center';ctx.fillText('empty',x,y0+bh/2)}}}
+  // flying screws spin out and arc to their hole
+  for(const s of S.vials)if(s.state==='fly'){if(s.jar&&s.hole!=null)s.to=holeOf(s.jar,s.hole);const e=Math.min(1,(now-s.t0)/420),k=e<.3?0:(e-.3)/.7,q=k*k*(3-2*k);const x=s.from[0]+(s.to[0]-s.from[0])*q,y=s.from[1]+(s.to[1]-s.from[1])*q-Math.sin(k*Math.PI)*40-(e<.3?e/.3*10:10*(1-k));
+    screwHead(x,y,L.bufS*.36*(1+(e<.3?e:.3)),s.c,{rot:e*12})}
+  for(const p of parts){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.col;ctx.fillRect(p.x-2,p.y-2,4,4)}ctx.globalAlpha=1}
+
+/* ---------- input ---------- */
+cv.addEventListener('pointerdown',e=>{if(!S)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(y<L.zy-10)return;
+  const pitch=(L.zw-10)/S.tubes.length;for(let t=0;t<S.tubes.length;t++)if(Math.abs(x-tubeX(t))<pitch/2){tapTube(t);break}});
+$('restart').onclick=()=>newLevel(S.n);$('plus').onclick=()=>{if(S.boost<=0)return;ensureAudio();if(addSlot()){S.boost--;hud()}};
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;if(S&&W>0&&H>0){try{if(VT==null)update(now,dt);render(NOW())}catch(e){console.error(e)}}}
+new ResizeObserver(()=>{if(S)layout()}).observe(stage);
+
+newLevel(1);requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
