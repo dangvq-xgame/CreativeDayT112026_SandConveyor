@@ -1,0 +1,419 @@
+{
+  "version": 1,
+  "levelId": 5,
+  "title": "Black Cat in Flower Garden",
+  "difficulty": "hard",
+  "rewardCoins": 150,
+  "conveyorConfig": {
+    "initialActiveSlots": 2,
+    "maxActiveSlots": 4,
+    "bufferSlots": 5
+  },
+  "sandBoard": {
+    "width": 16,
+    "height": 12,
+    "subDivision": 4,
+    "grid": [
+      [
+        12,
+        12,
+        12,
+        12,
+        3,
+        3,
+        12,
+        12,
+        12,
+        12,
+        3,
+        3,
+        12,
+        12,
+        12,
+        12
+      ],
+      [
+        12,
+        12,
+        12,
+        12,
+        3,
+        3,
+        3,
+        12,
+        12,
+        3,
+        3,
+        3,
+        12,
+        12,
+        12,
+        12
+      ],
+      [
+        12,
+        12,
+        12,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        12,
+        12,
+        12
+      ],
+      [
+        12,
+        12,
+        12,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        12,
+        12,
+        12
+      ],
+      [
+        12,
+        12,
+        12,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        12,
+        12,
+        12
+      ],
+      [
+        12,
+        12,
+        12,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        12,
+        12,
+        12
+      ],
+      [
+        12,
+        11,
+        11,
+        3,
+        3,
+        11,
+        11,
+        3,
+        3,
+        11,
+        11,
+        3,
+        3,
+        11,
+        11,
+        12
+      ],
+      [
+        11,
+        10,
+        10,
+        11,
+        3,
+        11,
+        11,
+        6,
+        6,
+        11,
+        11,
+        3,
+        11,
+        10,
+        10,
+        11
+      ],
+      [
+        11,
+        10,
+        10,
+        11,
+        3,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        3,
+        11,
+        10,
+        10,
+        11
+      ],
+      [
+        11,
+        11,
+        11,
+        11,
+        6,
+        6,
+        10,
+        10,
+        10,
+        10,
+        6,
+        6,
+        11,
+        11,
+        11,
+        11
+      ],
+      [
+        4,
+        4,
+        4,
+        4,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        4,
+        4,
+        4,
+        4
+      ],
+      [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    ]
+  },
+  "bucketQueue": [
+    {
+      "id": 501,
+      "colorId": 4,
+      "capacity": 24,
+      "requiredScrews": 3
+    },
+    {
+      "id": 502,
+      "colorId": 11,
+      "capacity": 18,
+      "requiredScrews": 3
+    },
+    {
+      "id": 503,
+      "colorId": 10,
+      "capacity": 12,
+      "requiredScrews": 3
+    },
+    {
+      "id": 504,
+      "colorId": 6,
+      "capacity": 12,
+      "requiredScrews": 3
+    },
+    {
+      "id": 505,
+      "colorId": 11,
+      "capacity": 18,
+      "requiredScrews": 3
+    },
+    {
+      "id": 506,
+      "colorId": 3,
+      "capacity": 20,
+      "requiredScrews": 3
+    },
+    {
+      "id": 507,
+      "colorId": 3,
+      "capacity": 20,
+      "requiredScrews": 3
+    },
+    {
+      "id": 508,
+      "colorId": 3,
+      "capacity": 20,
+      "requiredScrews": 3
+    },
+    {
+      "id": 509,
+      "colorId": 12,
+      "capacity": 24,
+      "requiredScrews": 3
+    },
+    {
+      "id": 510,
+      "colorId": 12,
+      "capacity": 24,
+      "requiredScrews": 3
+    }
+  ],
+  "queueColumns": [
+    {
+      "columnIndex": 0,
+      "rimColorId": 4,
+      "items": [
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 11
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 6,
+          "isMystery": true
+        },
+        {
+          "colorId": 11
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 3,
+          "isMystery": true
+        },
+        {
+          "colorId": 12
+        }
+      ]
+    },
+    {
+      "columnIndex": 1,
+      "rimColorId": 11,
+      "items": [
+        {
+          "colorId": 11
+        },
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 10,
+          "isMystery": true
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 12
+        }
+      ]
+    },
+    {
+      "columnIndex": 2,
+      "rimColorId": 6,
+      "items": [
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 11
+        },
+        {
+          "colorId": 11,
+          "isMystery": true
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 12,
+          "isMystery": true
+        },
+        {
+          "colorId": 12
+        }
+      ]
+    },
+    {
+      "columnIndex": 3,
+      "rimColorId": 3,
+      "items": [
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 11
+        },
+        {
+          "colorId": 3,
+          "isMystery": true
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 3
+        },
+        {
+          "colorId": 12
+        },
+        {
+          "colorId": 12
+        }
+      ]
+    }
+  ]
+}

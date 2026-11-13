@@ -1,0 +1,27 @@
+{
+  "name": "sand-conveyor-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sand Conveyor Web Demo — Sand Loop x Screw Jam x Color Blast Queue",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "validate-levels": "node tools/validate-levels.mjs"
+  },
+  "dependencies": {
+    "gsap": "^3.12.5",
+    "howler": "^2.2.4",
+    "pixi.js": "^8.6.0"
+  },
+  "devDependencies": {
+    "@types/howler": "^2.2.11",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  }
+}

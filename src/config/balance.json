@@ -1,0 +1,45 @@
+{
+  "conveyor": {
+    "isLinear": true,
+    "defaultActiveSlots": 2,
+    "maxActiveSlots": 4,
+    "holesPerBucket": 3,
+    "beltSpeedPxPerSec": 56,
+    "holdSpeedMultiplier": 1.85,
+    "holdThresholdMs": 125,
+    "suctionIntervalMs": 22
+  },
+  "bufferDock": {
+    "defaultSlots": 5,
+    "maxReviveSlots": 7
+  },
+  "queueColumns": {
+    "visibleDepth": 3,
+    "slideUpDurationMs": 200
+  },
+  "boosters": {
+    "extraSlot": {
+      "id": 1,
+      "key": "extra_slot",
+      "slotIncrement": 1,
+      "initialCount": 3,
+      "coinCost": 150
+    },
+    "hand": {
+      "id": 2,
+      "key": "hand",
+      "mode": "unlock_selected_bucket",
+      "initialCount": 3,
+      "coinCost": 200
+    },
+    "shuffle": {
+      "id": 3,
+      "key": "shuffle",
+      "minPriorityTopMatches": 2,
+      "animDurationMs": 780,
+      "initialCount": 3,
+      "coinCost": 120
+    }
+  }
+}
+

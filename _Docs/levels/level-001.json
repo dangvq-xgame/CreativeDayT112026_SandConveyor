@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "levelId": 1,
+  "title": "Sunny Waves (Tutorial)",
+  "difficulty": "tutorial",
+  "rewardCoins": 50,
+  "conveyorConfig": {
+    "initialActiveSlots": 2,
+    "maxActiveSlots": 4,
+    "bufferSlots": 5
+  },
+  "sandBoard": {
+    "width": 10,
+    "height": 6,
+    "subDivision": 4,
+    "grid": [
+      [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9],
+      [ 9,  9,  9,  9,  9,  9,  9,  9,  9,  9],
+      [ 9,  9,  9, 10, 10, 10, 10, 10,  9,  9],
+      [10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+      [10, 10, 10, 10, 10,  9,  9,  9,  9,  9],
+      [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    ]
+  },
+  "bucketQueue": [
+    { "id": 101, "colorId": 10, "capacity": 15, "requiredScrews": 3 },
+    { "id": 102, "colorId": 9,  "capacity": 15, "requiredScrews": 3 },
+    { "id": 103, "colorId": 10, "capacity": 15, "requiredScrews": 3 },
+    { "id": 104, "colorId": 9,  "capacity": 15, "requiredScrews": 3 }
+  ],
+  "queueColumns": [
+    {
+      "columnIndex": 0,
+      "rimColorId": 9,
+      "items": [
+        { "colorId": 10 },
+        { "colorId": 9 },
+        { "colorId": 10 }
+      ]
+    },
+    {
+      "columnIndex": 1,
+      "rimColorId": 10,
+      "items": [
+        { "colorId": 10 },
+        { "colorId": 9 },
+        { "colorId": 9 }
+      ]
+    },
+    {
+      "columnIndex": 2,
+      "rimColorId": 9,
+      "items": [
+        { "colorId": 9 },
+        { "colorId": 10 },
+        { "colorId": 9 }
+      ]
+    },
+    {
+      "columnIndex": 3,
+      "rimColorId": 10,
+      "items": [
+        { "colorId": 10 },
+        { "colorId": 10 },
+        { "colorId": 9 }
+      ]
+    }
+  ]
+}
+

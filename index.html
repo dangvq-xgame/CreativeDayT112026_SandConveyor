@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Sand Conveyor — Web Demo</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="stage" id="stage">
+        <!-- Top HUD -->
+        <header class="hud">
+          <div class="hud-group">
+            <button class="icon-btn" id="btn-levels" title="Chọn Level (1-5)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <button class="icon-btn" id="btn-restart" title="Chơi lại màn này">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12a8 8 0 1 0 2.6-5.9" />
+                <path d="M4 4v5h5" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="hud-center">
+            <div class="lvl-pill">
+              <span id="hud-level-title">LEVEL 1</span>
+              <small id="hud-level-sub">Sunny Waves</small>
+            </div>
+            <div class="prog-bar">
+              <i id="hud-progress-fill"></i>
+            </div>
+          </div>
+
+          <div class="hud-group">
+            <div class="coin-pill" title="Coins">
+              <span>🪙</span>
+              <strong id="hud-coins-text">500</strong>
+            </div>
+            <button class="icon-btn sound-btn" id="btn-sound" title="Bật/Tắt Âm thanh">🔊</button>
+          </div>
+        </header>
+
+        <!-- Hand Booster Active Banner -->
+        <div class="hand-banner" id="hand-booster-banner" hidden>
+          <span>👆 Chạm vào <strong>1 xô đang khóa</strong> trên băng chuyền để mở nắp ngay!</span>
+          <button class="cancel-hand-btn" id="btn-cancel-hand">✕ Hủy</button>
+        </div>
+
+        <!-- Main Game Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Tutorial Hint -->
+        <div class="gameplay-hint" id="gameplay-hint">
+          Chạm vào cột ống để bắn vít (Đủ 3 vít cùng màu sẽ mở nắp xô cát!)
+        </div>
+
+        <!-- Bottom 3-Booster Bar -->
+        <footer class="booster-bar">
+          <!-- Booster 1: ExtraSlot -->
+          <button class="booster-btn slot-booster" id="booster-extra-slot">
+            <div class="b-icon">＋</div>
+            <div class="b-labels">
+              <strong>Mở Slot</strong>
+              <small id="label-slot-status">Slot 2/4</small>
+            </div>
+            <span class="b-badge" id="badge-extra-slot">3</span>
+          </button>
+
+          <!-- Booster 2: Hand -->
+          <button class="booster-btn hand-booster" id="booster-hand">
+            <div class="b-icon">👆</div>
+            <div class="b-labels">
+              <strong>Bàn Tay</strong>
+              <small>Mở Xô</small>
+            </div>
+            <span class="b-badge" id="badge-hand">3</span>
+          </button>
+
+          <!-- Booster 3: Shuffle -->
+          <button class="booster-btn shuffle-booster" id="booster-shuffle">
+            <div class="b-icon">🔀</div>
+            <div class="b-labels">
+              <strong>Đảo Vít</strong>
+              <small>Ưu tiên</small>
+            </div>
+            <span class="b-badge" id="badge-shuffle">3</span>
+          </button>
+        </footer>
+
+        <!-- Level Select Modal (Levels 1..5) -->
+        <div class="overlay" id="level-menu-modal" hidden>
+          <div class="modal-card menu-card">
+            <div class="modal-header">
+              <div>
+                <span class="eyebrow">CHỌN MÀN CHƠI DEMO</span>
+                <h2>Danh sách Level (1–5)</h2>
+              </div>
+              <button class="close-btn" id="btn-close-menu">✕</button>
+            </div>
+            <div class="level-list" id="level-menu-list"></div>
+            <div class="modal-footer">
+              <button class="secondary-btn" id="btn-reset-save">Khôi phục Save gốc</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Win / Lose / Revive Result Overlay -->
+        <div class="overlay" id="result-overlay" hidden>
+          <div class="modal-card result-card">
+            <span class="eyebrow" id="result-eyebrow">HOÀN THÀNH</span>
+            <h2 id="result-title">Tuyệt vời!</h2>
+            <p id="result-desc">Toàn bộ tranh cát đã được hút sạch.</p>
+            <div class="result-actions">
+              <button class="cta-btn alt-green" id="btn-result-revive" hidden>
+                +1 Lỗ chờ & Chơi tiếp
+              </button>
+              <button class="cta-btn" id="btn-result-primary">Màn tiếp theo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+

@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "levelId": 2,
+  "title": "Berry Sunset",
+  "difficulty": "easy",
+  "rewardCoins": 70,
+  "conveyorConfig": {
+    "initialActiveSlots": 2,
+    "maxActiveSlots": 4,
+    "bufferSlots": 5
+  },
+  "sandBoard": {
+    "width": 12,
+    "height": 8,
+    "subDivision": 4,
+    "grid": [
+      [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      [
+        10,
+        10,
+        10,
+        10,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        10,
+        10,
+        10,
+        10,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        6,
+        6,
+        6,
+        6,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    ]
+  },
+  "bucketQueue": [
+    {
+      "id": 201,
+      "colorId": 6,
+      "capacity": 16,
+      "requiredScrews": 3
+    },
+    {
+      "id": 202,
+      "colorId": 9,
+      "capacity": 16,
+      "requiredScrews": 3
+    },
+    {
+      "id": 203,
+      "colorId": 10,
+      "capacity": 16,
+      "requiredScrews": 3
+    },
+    {
+      "id": 204,
+      "colorId": 9,
+      "capacity": 16,
+      "requiredScrews": 3
+    },
+    {
+      "id": 205,
+      "colorId": 6,
+      "capacity": 16,
+      "requiredScrews": 3
+    },
+    {
+      "id": 206,
+      "colorId": 10,
+      "capacity": 16,
+      "requiredScrews": 3
+    }
+  ],
+  "queueColumns": [
+    {
+      "columnIndex": 0,
+      "rimColorId": 9,
+      "items": [
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 10
+        }
+      ]
+    },
+    {
+      "columnIndex": 1,
+      "rimColorId": 10,
+      "items": [
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 9
+        }
+      ]
+    },
+    {
+      "columnIndex": 2,
+      "rimColorId": 9,
+      "items": [
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 10
+        }
+      ]
+    },
+    {
+      "columnIndex": 3,
+      "rimColorId": 6,
+      "items": [
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 10
+        }
+      ]
+    }
+  ]
+}

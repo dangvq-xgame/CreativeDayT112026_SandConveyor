@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "palette": "assets/data/palette.json",
+  "levels": [
+    "assets/data/levels/level-001.json",
+    "assets/data/levels/level-002.json",
+    "assets/data/levels/level-003.json",
+    "assets/data/levels/level-004.json",
+    "assets/data/levels/level-005.json"
+  ],
+  "audio": {
+    "sfx-screw-pop": "assets/audio/sfx/sfx-screw-pop.mp3",
+    "sfx-screw-land": "assets/audio/sfx/sfx-screw-land.mp3",
+    "sfx-lid-open": "assets/audio/sfx/sfx-lid-open.mp3",
+    "sfx-sand-drain": "assets/audio/sfx/sfx-sand-drain.wav",
+    "sfx-booster-shuffle": "assets/audio/sfx/sfx-booster-shuffle.mp3",
+    "sfx-booster-hand": "assets/audio/sfx/sfx-booster-hand.mp3",
+    "sfx-win": "assets/audio/sfx/sfx-win.mp3"
+  }
+}
+

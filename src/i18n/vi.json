@@ -1,0 +1,17 @@
+{
+  "level": "Màn",
+  "tap_hint": "Chạm vào cột ống để bắn vít mở nắp xô cát (đủ 3 vít)",
+  "hand_hint": "Chạm vào 1 xô đang khóa trên băng chuyền để mở nắp ngay!",
+  "win_eyebrow": "HOÀN THÀNH TRANH CÁT",
+  "win_title": "Tuyệt vời!",
+  "win_desc": "Toàn bộ hạt cát đã chảy đầy vào xô.",
+  "next_level": "Màn tiếp theo",
+  "lose_eyebrow": "KHAY CHỜ ĐÃ ĐẦY",
+  "lose_title": "Hết chỗ chứa!",
+  "revive_btn": "+1 Lỗ chờ & Chơi tiếp",
+  "retry_btn": "Chơi lại",
+  "booster_slot": "Mở Slot",
+  "booster_hand": "Bàn Tay",
+  "booster_shuffle": "Đảo Vít"
+}
+

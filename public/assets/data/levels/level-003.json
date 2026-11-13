@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "levelId": 3,
+  "title": "Tropical Bloom",
+  "difficulty": "medium",
+  "rewardCoins": 100,
+  "conveyorConfig": {
+    "initialActiveSlots": 2,
+    "maxActiveSlots": 4,
+    "bufferSlots": 5
+  },
+  "sandBoard": {
+    "width": 12,
+    "height": 10,
+    "subDivision": 4,
+    "grid": [
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        4,
+        4,
+        4
+      ],
+      [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      [
+        4,
+        4,
+        4,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    ]
+  },
+  "bucketQueue": [
+    {
+      "id": 301,
+      "colorId": 1,
+      "capacity": 15,
+      "requiredScrews": 3
+    },
+    {
+      "id": 302,
+      "colorId": 6,
+      "capacity": 15,
+      "requiredScrews": 3
+    },
+    {
+      "id": 303,
+      "colorId": 10,
+      "capacity": 15,
+      "requiredScrews": 3
+    },
+    {
+      "id": 304,
+      "colorId": 4,
+      "capacity": 15,
+      "requiredScrews": 3
+    },
+    {
+      "id": 305,
+      "colorId": 4,
+      "capacity": 15,
+      "requiredScrews": 3
+    },
+    {
+      "id": 306,
+      "colorId": 10,
+      "capacity": 15,
+      "requiredScrews": 3
+    },
+    {
+      "id": 307,
+      "colorId": 6,
+      "capacity": 15,
+      "requiredScrews": 3
+    },
+    {
+      "id": 308,
+      "colorId": 1,
+      "capacity": 15,
+      "requiredScrews": 3
+    }
+  ],
+  "queueColumns": [
+    {
+      "columnIndex": 0,
+      "rimColorId": 1,
+      "items": [
+        {
+          "colorId": 1
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 1
+        }
+      ]
+    },
+    {
+      "columnIndex": 1,
+      "rimColorId": 10,
+      "items": [
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 1
+        },
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 1
+        }
+      ]
+    },
+    {
+      "columnIndex": 2,
+      "rimColorId": 4,
+      "items": [
+        {
+          "colorId": 1
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 6
+        }
+      ]
+    },
+    {
+      "columnIndex": 3,
+      "rimColorId": 6,
+      "items": [
+        {
+          "colorId": 6
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 4
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 1
+        }
+      ]
+    }
+  ]
+}

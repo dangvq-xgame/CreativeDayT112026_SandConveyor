@@ -1,0 +1,17 @@
+{
+  "level": "Level",
+  "tap_hint": "Tap a queue column to pop its top screw (fill 3 holes to open bucket)",
+  "hand_hint": "Tap any locked bucket on the conveyor to unlock its lid immediately!",
+  "win_eyebrow": "PICTURE DRAINED",
+  "win_title": "All Sand Collected!",
+  "win_desc": "Every sand grain flowed into its matching bucket.",
+  "next_level": "Next Level",
+  "lose_eyebrow": "BUFFER RACK FULL",
+  "lose_title": "Out of Space!",
+  "revive_btn": "+1 Buffer Slot & Continue",
+  "retry_btn": "Retry",
+  "booster_slot": "Extra Slot",
+  "booster_hand": "Hand",
+  "booster_shuffle": "Shuffle"
+}
+

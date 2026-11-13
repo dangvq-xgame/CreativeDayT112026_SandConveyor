@@ -1,0 +1,10 @@
+{
+  "name": "Sand Conveyor Puzzle",
+  "short_name": "SandConveyor",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#bfe3fb",
+  "theme_color": "#3898ff"
+}
+
