@@ -395,20 +395,25 @@ export class SandBucketView {
     w: number,
     bucket: SandBucketModel,
     nowMs: number,
-    highlightForHandBooster = false
+    highlightForHandBooster = false,
+    speedMultiplier = 1
   ): void {
     const h = w * H_RATIO;
     const dpr = getRenderScale(ctx);
     const colorId = bucket.colorId;
-    const twistMs = GameConfig.lidTwistDurationMs;
-    const flipMs = GameConfig.lidFlipDurationMs;
+    const spd = Math.max(0.2, speedMultiplier);
+    const twistMs = Math.round(GameConfig.lidTwistDurationMs / spd);
+    const flipMs = Math.round(GameConfig.lidFlipDurationMs / spd);
+    const flightMs = Math.round(GameConfig.sandStreamDurationMs / spd);
 
     const openElapsed = bucket.isOpen
       ? bucket.openStartedAtMs !== null
         ? nowMs - bucket.openStartedAtMs
         : twistMs + flipMs
       : -1;
-    const completeElapsed = bucket.completedAtMs !== null ? nowMs - bucket.completedAtMs : -1;
+    const rawCompleteElapsed = bucket.completedAtMs !== null ? nowMs - bucket.completedAtMs : -1;
+    // Only snap lid shut and celebrate AFTER sand grains have fully arrived into the mouth
+    const completeElapsed = rawCompleteElapsed >= flightMs ? rawCompleteElapsed - flightMs : -1;
 
     // --- Lid pose (0 = closed, 1 = propped open) & twist wiggle --------------------------------
     let lidPose = 0;
@@ -428,9 +433,9 @@ export class SandBucketView {
     }
     let popScale = 1;
     if (completeElapsed >= 0) {
-      const c = clamp01(completeElapsed / 200);
+      const c = clamp01(completeElapsed / Math.round(180 / spd));
       lidPose *= 1 - easeOutCubic(c);
-      popScale = 1 + Math.sin(clamp01(completeElapsed / 260) * Math.PI) * 0.08;
+      popScale = 1 + Math.sin(clamp01(completeElapsed / Math.round(260 / spd)) * Math.PI) * 0.08;
     }
 
     const bx = x + shakeX;
@@ -487,8 +492,11 @@ export class SandBucketView {
       }
     }
 
-    // 4. Sand inside the open mouth (rises with fill ratio)
-    const fillRatio = bucket.capacity > 0 ? clamp01(bucket.collected / bucket.capacity) : 0;
+    // 4. Sand inside the open mouth (rises with fill ratio as grains visually land)
+    const visualSandCount = bucket.completedAtMs !== null && completeElapsed >= 0
+      ? bucket.capacity
+      : (bucket.displayCollected || bucket.collected);
+    const fillRatio = bucket.capacity > 0 ? clamp01(visualSandCount / bucket.capacity) : 0;
     if (bodyOpenAlpha > 0 && fillRatio > 0) {
       const sandTop = SandBucketView.sprite(K_SAND_TOP, colorId, w, dpr);
       if (sandTop) {
@@ -512,12 +520,13 @@ export class SandBucketView {
     if (bodyOpenAlpha < 1) {
       const unscrew = openElapsed >= 0 ? clamp01(openElapsed / twistMs) : 0;
       const n = Math.min(3, bucket.holes.length);
+      const landMs = Math.round(240 / spd);
       for (let k = 0; k < n; k++) {
         const hole = bucket.holes[k];
         if (!hole || !hole.landed) continue;
         const hx = bx + (k - 1) * HOLE_SPACING * w;
         const hy = y + w * SandBucketView.HOLE_DY_RATIO;
-        const t = hole.landedAtMs !== null ? clamp01((nowMs - hole.landedAtMs) / 240) : 1;
+        const t = hole.landedAtMs !== null ? clamp01((nowMs - hole.landedAtMs) / landMs) : 1;
         let rot = -(1 - t) * 6.5;
         let scale = 1 + Math.sin(t * Math.PI) * 0.24;
         let alpha = 1;
@@ -540,7 +549,8 @@ export class SandBucketView {
 
     // 6. Percentage label (outlined text) — turns green when complete
     const labelY = y + ((LABEL_TOP + LABEL_BOT) / 2) * h + h * 0.005;
-    const done = bucket.completedAtMs !== null || bucket.isFull();
+    const isCompletedCelebrated = bucket.completedAtMs !== null && completeElapsed >= 0;
+    const done = isCompletedCelebrated || (bucket.isFull() && (bucket.displayCollected >= bucket.capacity));
     if (done) {
       const lx = bx - LABEL_HALF_W * w;
       const ly = y + LABEL_TOP * h;
@@ -551,7 +561,7 @@ export class SandBucketView {
     } else {
       drawOutlinedText(
         ctx,
-        percentText(bucket.getPercentage()),
+        percentText(bucket.getPercentage(true)),
         bx,
         labelY,
         w * 0.2,

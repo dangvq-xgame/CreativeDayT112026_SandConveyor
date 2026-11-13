@@ -59,20 +59,28 @@ export class SandSuctionRule {
     nowMs: number,
     lidOpenReadyDelayMs: number = GameplayConfig.lidOpenReadyDelayMs,
     cellSizePx: number = GameplayConfig.defaultCellSizePx,
-    boardLeftX: number = GameplayConfig.defaultBoardLeftX
+    boardLeftX: number = GameplayConfig.defaultBoardLeftX,
+    allowBuriedFallback = false
   ): SandDrainEvent | null {
     for (const b of conveyor.getActiveBuckets()) {
       b.markCompletedIfFull(nowMs);
     }
 
-    for (const cand of SandSuctionRule.getSuctionCandidates(conveyor, nowMs, lidOpenReadyDelayMs)) {
+    const candidates = SandSuctionRule.getSuctionCandidates(conveyor, nowMs, lidOpenReadyDelayMs);
+
+    // Strictly exposed surface sand (closest to the bucket mouth first).
+    // When sand is blocked by another color, the bucket stops and waits ("ngung").
+    // When blocking sand is cleared and gravity drops this color, it resumes ("chay tiep").
+    for (const cand of candidates) {
+      if (cand.bucket.spawnEnterOffsetPx > 0) continue;
+
       const preferredCol = SandSuctionRule.getPreferredColumn(
         cand.bucket.visualX,
         boardLeftX,
         cellSizePx,
         board.width
       );
-      const pulled = board.pullBottomCellOfColor(cand.bucket.colorId, cellSizePx, preferredCol);
+      const pulled = board.pullBottomCellOfColor(cand.bucket.colorId, cellSizePx, preferredCol, false);
       if (!pulled) {
         cand.bucket.waitingForSand = true;
         continue;
@@ -89,6 +97,33 @@ export class SandSuctionRule {
         colorId: pulled.colorId,
         bucketCompleted: completed
       };
+    }
+
+    // Fallback only if explicitly enabled (e.g. validator / bot solver)
+    if (allowBuriedFallback) {
+      for (const cand of candidates) {
+        if (cand.bucket.spawnEnterOffsetPx > 0) continue;
+        const preferredCol = SandSuctionRule.getPreferredColumn(
+          cand.bucket.visualX,
+          boardLeftX,
+          cellSizePx,
+          board.width
+        );
+        const pulled = board.pullBottomCellOfColor(cand.bucket.colorId, cellSizePx, preferredCol, true);
+        if (pulled) {
+          cand.bucket.waitingForSand = false;
+          cand.bucket.collected++;
+          const completed = cand.bucket.markCompletedIfFull(nowMs);
+          return {
+            bucket: cand.bucket,
+            slotIndex: cand.slotIndex,
+            col: pulled.col,
+            row: pulled.row,
+            colorId: pulled.colorId,
+            bucketCompleted: completed
+          };
+        }
+      }
     }
 
     return null;

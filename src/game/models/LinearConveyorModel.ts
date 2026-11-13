@@ -206,7 +206,7 @@ export class LinearConveyorModel {
         b.spawnEnterOffsetPx = Math.max(0, b.spawnEnterOffsetPx - slideSpeedPxPerSec * dt);
       }
       if (visibleMinX !== undefined && visibleMaxX !== undefined) {
-        const targetX = this.getSlotX(i, trackStartX, trackEndX, visibleMinX, visibleMaxX);
+        const targetX = this.getBayX(i, visibleMinX, visibleMaxX);
         b.visualX = targetX - b.spawnEnterOffsetPx;
       } else {
         const slotX = this.getSlotX(i, trackStartX, trackEndX);

@@ -353,10 +353,11 @@ export class QueueColumnView {
     layout: QueueColumnsLayout,
     centerX: number,
     nowMs: number,
-    hideScrewsForShuffle = false
+    hideScrewsForShuffle = false,
+    gameSpeed = 1
   ): void {
     const { zoneW, rowStepY, visibleDepth } = layout;
-    const slideMs = BalanceConfig.queueColumns.slideUpDurationMs;
+    const slideMs = Math.max(80, BalanceConfig.queueColumns.slideUpDurationMs / gameSpeed);
     const dpr = getRenderScale(ctx);
     const canvasH = ctx.canvas.height / dpr;
     const g = tubeGeom(layout);

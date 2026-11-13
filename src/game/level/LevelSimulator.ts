@@ -43,7 +43,7 @@ function landFlight(state: GameState, plan: ScrewFlightPlan | undefined, nowMs: 
 /** Drains every open bucket as far as possible (one cell at a time, real suction priority). */
 function drainAll(board: SandBoardModel, conveyor: LinearConveyorModel, nowMs: number): boolean {
   let drained = false;
-  while (SandSuctionRule.stepSuction(board, conveyor, nowMs, 0)) drained = true;
+  while (SandSuctionRule.stepSuction(board, conveyor, nowMs, 0, undefined, undefined, true)) drained = true;
   return drained;
 }
 

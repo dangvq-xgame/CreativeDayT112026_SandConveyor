@@ -32,6 +32,8 @@ export class SandBucketModel {
 
   /** Sand cells collected so far (0..capacity). */
   collected = 0;
+  /** Sand cells visually arrived into the mouth (smoothly catches up as grains land). */
+  displayCollected = 0;
   /** True once every hole has a landed screw and the lid has unlocked. */
   isOpen = false;
   openStartedAtMs: number | null = null;
@@ -148,11 +150,13 @@ export class SandBucketModel {
   /**
    * Fill percentage for the label: `round(collected / capacity * 100)`, but never shows 100 before the
    * bucket is really full (large capacities would otherwise round 99.5% up to 100%).
+   * When `useDisplay = true`, uses visually arrived sand count (`displayCollected`).
    */
-  getPercentage(): number {
+  getPercentage(useDisplay = false): number {
     if (this.capacity <= 0) return 100;
-    if (this.isFull()) return 100;
-    const pct = Math.round((this.collected / this.capacity) * 100);
+    const count = useDisplay ? (this.displayCollected || this.collected) : this.collected;
+    if (this.isFull() && count >= this.capacity) return 100;
+    const pct = Math.round((count / this.capacity) * 100);
     return Math.max(0, Math.min(MAX_PERCENT_WHILE_FILLING, pct));
   }
 

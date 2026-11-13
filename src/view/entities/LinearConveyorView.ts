@@ -74,8 +74,8 @@ function computeGeom(L: ConveyorLayout): BeltGeom {
     archTop,
     leftArchX,
     rightArchX,
-    clipMinX: leftArchX + archW - archT,
-    clipMaxX: rightArchX + archT,
+    clipMinX: leftArchX - w * 0.25,
+    clipMaxX: rightArchX + archW + w * 0.25,
     plankP: Math.max(10, w * 0.2)
   };
 }
@@ -298,7 +298,8 @@ export class LinearConveyorView {
     layout: ConveyorLayout,
     nowMs: number,
     isFastForward: boolean,
-    highlightLockedBuckets: boolean
+    highlightLockedBuckets: boolean,
+    speedMultiplier = 1
   ): void {
     const dpr = getRenderScale(ctx);
     const L = LinearConveyorView.ensureLayers(layout, dpr);
@@ -350,7 +351,7 @@ export class LinearConveyorView {
 
     // Draw all 4 Bay Stations (Fish Jam Fever style: open bays have buckets, locked bays have 3D lock pads)
     for (let i = 0; i < conveyor.maxActiveSlots; i++) {
-      const bayX = conveyor.getSlotX(i, trackStartX, trackEndX, layout.visibleMinX, layout.visibleMaxX);
+      const bayX = conveyor.getBayX(i, layout.visibleMinX, layout.visibleMaxX);
       const isLocked = i >= conveyor.activeSlots;
 
       if (isLocked) {
@@ -362,13 +363,13 @@ export class LinearConveyorView {
         const bucket = conveyor.slots[i];
         if (bucket) {
           const bx = bucket.visualX || bayX;
-          SandBucketView.draw(ctx, bx, bucketCenterY, bucketWidth, bucket, nowMs, highlightLockedBuckets);
+          SandBucketView.draw(ctx, bx, bucketCenterY, bucketWidth, bucket, nowMs, highlightLockedBuckets, speedMultiplier);
         }
       }
     }
 
     for (const leaving of conveyor.leavingBuckets) {
-      SandBucketView.draw(ctx, leaving.visualX, bucketCenterY, bucketWidth, leaving, nowMs, false);
+      SandBucketView.draw(ctx, leaving.visualX, bucketCenterY, bucketWidth, leaving, nowMs, false, speedMultiplier);
     }
     ctx.restore();
 

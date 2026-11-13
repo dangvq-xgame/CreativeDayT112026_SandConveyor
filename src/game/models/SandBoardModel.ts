@@ -127,14 +127,17 @@ export class SandBoardModel {
   /**
    * Picks (without removing) the cell `pullBottomCellOfColor` would drain, or `null`.
    *
-   * 1. Columns whose bottom-most cell has `colorId`, preferring the lowest current row, then the lowest
-   *    original stratum (`originY` desc) so the picture drains layer by layer without vertical chimneys,
-   *    then proximity to `preferredColX`, then the leftmost column.
-   * 2. If no column exposes `colorId` at its bottom (e.g. an inner detail), fall back to the lowest
-   *    buried cell of `colorId` in each column, same ordering (SandLoopGame DrawableChunk.cs
-   *    `isBreakIfOtherColor = false`, so an open bucket never deadlocks).
+   * 1. Columns whose bottom-most cell has `colorId`, prioritizing proximity to `preferredColX` (funnel zones),
+   *    then lowest current row, then closer column distance. Sand flows from directly above/near the bucket!
+   * 2. If no column exposes `colorId` at its bottom, returns `null` so the bucket waits for blocking sand
+   *    to drain and gravity to drop its color down ("ngung" / "chay tiep").
+   *    Only if `allowBuriedFallback = true` (last-resort safety) will it search buried cells.
    */
-  findPullCandidate(colorId: ColorId, preferredColX?: number): SandPullResult | null {
+  findPullCandidate(
+    colorId: ColorId,
+    preferredColX?: number,
+    allowBuriedFallback = false
+  ): SandPullResult | null {
     const distOf = (x: number): number => (preferredColX !== undefined ? Math.abs(x - preferredColX) : x);
     const candidates: PullCandidate[] = [];
     for (let x = 0; x < this.width; x++) {
@@ -145,7 +148,7 @@ export class SandBoardModel {
       }
     }
 
-    if (candidates.length === 0) {
+    if (candidates.length === 0 && allowBuriedFallback) {
       for (let x = 0; x < this.width; x++) {
         for (let y = this.height - 1; y >= 0; y--) {
           const cell = this.cells[y][x];
@@ -172,9 +175,10 @@ export class SandBoardModel {
   pullBottomCellOfColor(
     colorId: ColorId,
     cellSizePx: number = GameplayConfig.defaultCellSizePx,
-    preferredColX?: number
+    preferredColX?: number,
+    allowBuriedFallback = true
   ): SandPullResult | null {
-    const chosen = this.findPullCandidate(colorId, preferredColX);
+    const chosen = this.findPullCandidate(colorId, preferredColX, allowBuriedFallback);
     if (!chosen) return null;
     this.removeCellAndCollapse(chosen.col, chosen.row, cellSizePx);
     return chosen;
@@ -208,7 +212,14 @@ export class SandBoardModel {
   }
 }
 
-/** Lower row first, then lower origin stratum, then closer to the preferred column, then leftmost. */
+/**
+ * Prioritizes proximity to the bucket mouth (column distance),
+ * then lowest row (bottom-most exposed cell),
+ * then lower origin stratum, then leftmost column.
+ */
 function compareCandidates(a: PullCandidate, b: PullCandidate): number {
-  return b.row - a.row || b.originY - a.originY || a.dist - b.dist || a.col - b.col;
+  if (a.dist !== b.dist) return a.dist - b.dist;
+  if (b.row !== a.row) return b.row - a.row;
+  if (b.originY !== a.originY) return b.originY - a.originY;
+  return a.col - b.col;
 }

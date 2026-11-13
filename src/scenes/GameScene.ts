@@ -295,7 +295,7 @@ export class GameScene {
     const { bucketCenterY, bucketWidth, trackStartX, trackEndX, visibleMinX, visibleMaxX } = this.conveyorLayout;
     if (Math.abs(y - bucketCenterY) <= bucketWidth * 0.72) {
       for (let i = this.state.conveyor.activeSlots; i < this.state.conveyor.maxActiveSlots; i++) {
-        const bayX = this.state.conveyor.getSlotX(i, trackStartX, trackEndX, visibleMinX, visibleMaxX);
+        const bayX = this.state.conveyor.getBayX(i, visibleMinX, visibleMaxX);
         if (Math.abs(x - bayX) <= bucketWidth * 0.5) {
           this.handleUseExtraSlot();
           return;
@@ -642,13 +642,16 @@ export class GameScene {
       const { trackStartX, trackEndX, visibleMinX, visibleMaxX, bucketWidth } = this.conveyorLayout;
       for (let i = 0; i < this.state.conveyor.activeSlots; i++) {
         const b = this.state.conveyor.slots[i];
-        const targetX = this.state.conveyor.getSlotX(i, trackStartX, trackEndX, visibleMinX, visibleMaxX);
+        const targetX = this.state.conveyor.getBayX(i, visibleMinX, visibleMaxX);
         if (b) {
           if (b.spawnEnterOffsetPx > 0) {
-            b.spawnEnterOffsetPx = Math.max(0, b.spawnEnterOffsetPx - 450 * effDt);
+            const decelSpeed = Math.max(240, b.spawnEnterOffsetPx * 8.5 + 80);
+            b.spawnEnterOffsetPx = Math.max(0, b.spawnEnterOffsetPx - decelSpeed * effDt);
           }
           b.visualX = targetX - b.spawnEnterOffsetPx;
-          if (b.completedAtMs !== null && nowMs - b.completedAtMs > (260 / this.gameSpeed)) {
+          // Only depart after sand stream finishes landing and celebration pop completes
+          const departDelayMs = (GameConfig.sandStreamDurationMs + 320) / this.gameSpeed;
+          if (b.completedAtMs !== null && nowMs - b.completedAtMs > departDelayMs) {
             this.state.conveyor.leavingBuckets.push(b);
             this.state.conveyor.slots[i] = null;
           }
@@ -657,8 +660,9 @@ export class GameScene {
 
       for (let i = this.state.conveyor.leavingBuckets.length - 1; i >= 0; i--) {
         const lb = this.state.conveyor.leavingBuckets[i];
-        lb.visualX += 480 * effDt;
-        if (lb.visualX >= visibleMaxX + bucketWidth * 0.6) {
+        const departSpeed = Math.max(380, (lb.visualX - trackStartX) * 1.5 + 200);
+        lb.visualX += departSpeed * effDt;
+        if (lb.visualX >= visibleMaxX + bucketWidth * 1.2) {
           this.state.conveyor.leavingBuckets.splice(i, 1);
         }
       }
@@ -688,12 +692,13 @@ export class GameScene {
       if (drainEv) {
         SandBoardView.notifySuctionColumn(drainEv.col);
         const startX = this.boardFrameX + (drainEv.col + 0.5) * this.boardCellSize;
-        const startY = this.boardBottomY - this.boardCellSize * 0.5;
+        const startY = this.boardFrameY + (drainEv.row + 0.5) * this.boardCellSize;
+        const mouthY = SandBucketView.getMouthOffsetY(this.conveyorLayout.bucketWidth);
         this.sandStreamFX.spawnGrain(
           startX,
           startY,
           drainEv.bucket,
-          -this.conveyorLayout.bucketWidth * 0.22,
+          mouthY,
           drainEv.colorId,
           nowMs
         );
@@ -710,7 +715,7 @@ export class GameScene {
 
     // 5. Update sand gravity, sand stream particles & confetti
     this.state.sandBoard.updateGravity(effDt, GameConfig.gravityPxPerSecSq);
-    this.sandStreamFX.update(nowMs, effDt);
+    this.sandStreamFX.update(nowMs, effDt, this.gameSpeed);
     this.confettiFX.update(effDt);
 
     // 6. Check Win Condition
@@ -758,7 +763,7 @@ export class GameScene {
     );
 
     // 2. Sand Streams & Burst Particles
-    this.sandStreamFX.draw(ctx, nowMs, this.conveyorLayout.bucketCenterY);
+    this.sandStreamFX.draw(ctx, nowMs, this.conveyorLayout.bucketCenterY, this.gameSpeed);
 
     // 3. Middle Area: Linear Conveyor Belt & 3-Hole Sand Buckets
     LinearConveyorView.draw(
@@ -767,7 +772,8 @@ export class GameScene {
       this.conveyorLayout,
       nowMs,
       this.input.isHoldingFastForward(nowMs),
-      this.fsm.phase === 'BOOSTER_HAND_SELECT'
+      this.fsm.phase === 'BOOSTER_HAND_SELECT',
+      this.gameSpeed
     );
 
     // 4. Buffer Dock (5 waiting holes + [+] ExtraSlot button)
@@ -788,7 +794,8 @@ export class GameScene {
       this.queueLayout,
       this.viewW / 2,
       nowMs,
-      isShuffling
+      isShuffling,
+      this.gameSpeed
     );
 
     // 6. Shuffle Spiral Vortex FX
@@ -796,23 +803,27 @@ export class GameScene {
       this.shuffleFX.draw(ctx, nowMs);
     }
 
-    // 7. Flying Screws in transit (Bezier arc + spin)
-    const flightDuration = GameConfig.screwFlightDurationMs;
+    // 7. Flying Screws in transit (Bezier arc + 3D spin + parabolic hop)
+    const flightDuration = Math.round(GameConfig.screwFlightDurationMs / this.gameSpeed);
     for (const fs of this.flyingScrews) {
       const e = Math.min(1, Math.max(0, (nowMs - fs.startedAtMs) / flightDuration));
-      const k = e < 0.25 ? 0 : (e - 0.25) / 0.75;
-      const q = k * k * (3 - 2 * k);
+      const k = e < 0.22 ? 0 : (e - 0.22) / 0.78;
+      const q = k * k * (3 - 2 * k); // cubic ease-in-out
       const x = fs.fromX + (fs.toX - fs.fromX) * q;
+      const arcPeak = 42 + Math.abs(fs.toX - fs.fromX) * 0.14;
       const y =
         fs.fromY +
         (fs.toY - fs.fromY) * q -
-        Math.sin(k * Math.PI) * 42 -
-        (e < 0.25 ? (e / 0.25) * 10 : 10 * (1 - k));
+        Math.sin(k * Math.PI) * arcPeak -
+        (e < 0.22 ? (e / 0.22) * 16 : 16 * (1 - k));
+
+      const spin = e * Math.PI * 4;
+      const scaleHop = 1 + Math.sin(k * Math.PI) * 0.32;
 
       ScrewView.draw(ctx, x, y, this.bufferSlotSize * 0.38, fs.plan.colorId, {
-        rotation: e * 12,
-        scale: 1 + (e < 0.3 ? e : 0.3 * (1 - k)),
-        showShaft: e < 0.72
+        rotation: spin,
+        scale: scaleHop,
+        showShaft: e < 0.75
       });
     }
 

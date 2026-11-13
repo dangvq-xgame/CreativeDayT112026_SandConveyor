@@ -107,12 +107,21 @@ export class SandStreamFX {
     }
   }
 
-  update(nowMs: number, dtSec: number): void {
-    const streamMs = GameConfig.sandStreamDurationMs;
+  update(nowMs: number, dtSec: number, speedMultiplier = 1): void {
+    const streamMs = GameConfig.sandStreamDurationMs / speedMultiplier;
     const grains = this.grains;
     for (let i = grains.length - 1; i >= 0; i--) {
       if (nowMs - grains[i].startedAtMs >= streamMs) {
         const g = grains[i];
+        if (g.targetBucket) {
+          g.targetBucket.displayCollected = Math.min(
+            g.targetBucket.collected,
+            (g.targetBucket.displayCollected || 0) + 0.2
+          );
+          if (g.targetBucket.isFull() && g.targetBucket.displayCollected >= g.targetBucket.capacity - 0.05) {
+            g.targetBucket.displayCollected = g.targetBucket.capacity;
+          }
+        }
         grains[i] = grains[grains.length - 1];
         grains.pop();
         this.grainPool.push(g);
@@ -145,10 +154,10 @@ export class SandStreamFX {
     return SpriteCache.get(key, S, S, dpr, S / 2, S / 2, (c) => paintBead(c, S / 2, S / 2, rc, colorId));
   }
 
-  draw(ctx: CanvasRenderingContext2D, nowMs: number, bucketCenterY: number): void {
+  draw(ctx: CanvasRenderingContext2D, nowMs: number, bucketCenterY: number, speedMultiplier = 1): void {
     if (this.grains.length === 0 && this.particles.length === 0) return;
     const dpr = getRenderScale(ctx);
-    const streamMs = GameConfig.sandStreamDurationMs;
+    const streamMs = GameConfig.sandStreamDurationMs / speedMultiplier;
     const prevAlpha = ctx.globalAlpha;
 
     for (let i = 0; i < this.grains.length; i++) {
