@@ -8,6 +8,7 @@ export class LinearConveyorModel {
   readonly maxActiveSlots: number;
   activeSlots: number;
   readonly slots: Array<SandBucketModel | null>;
+  readonly leavingBuckets: SandBucketModel[] = [];
   readonly queue: SandBucketDef[];
   private spawnCounter = 0;
   private beltTravelDistancePx = 0;
@@ -100,7 +101,7 @@ export class LinearConveyorModel {
     const list: Array<{ bucket: SandBucketModel; slotIndex: number }> = [];
     for (let i = 0; i < this.activeSlots; i++) {
       const b = this.slots[i];
-      if (b && !b.isOpen) {
+      if (b && !b.isOpen && b.getMissingScrewsCount() > 0) {
         list.push({ bucket: b, slotIndex: i });
       }
     }
@@ -116,4 +117,3 @@ export class LinearConveyorModel {
     return list;
   }
 }
-

@@ -14,7 +14,9 @@ export interface SandDrainEvent {
 
 export class SandSuctionRule {
   /**
-   * Checks open buckets on the conveyor (sorted by spawnSeq) and pulls 1 matching bottom cell from SandBoard.
+   * Checks open buckets on the conveyor (prioritizing partially-filled buckets first so two open
+   * buckets of the same colorId never split available sand, then sorted by spawnSeq) and pulls 1
+   * matching bottom cell from SandBoard.
    */
   static stepSuction(
     board: SandBoardModel,
@@ -39,7 +41,10 @@ export class SandSuctionRule {
     }
 
     if (openCandidates.length === 0) return null;
-    openCandidates.sort((a, b) => a.bucket.spawnSeq - b.bucket.spawnSeq);
+    openCandidates.sort(
+      (a, b) =>
+        b.bucket.collected - a.bucket.collected || a.bucket.spawnSeq - b.bucket.spawnSeq
+    );
 
     for (const cand of openCandidates) {
       const preferredCol = Math.round((cand.bucket.visualX - boardLeftX) / Math.max(1, cellSizePx));
@@ -70,4 +75,3 @@ export class SandSuctionRule {
     return null;
   }
 }
-

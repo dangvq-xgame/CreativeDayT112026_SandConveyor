@@ -14,91 +14,355 @@
     "height": 10,
     "subDivision": 4,
     "grid": [
-      [ 8,  8,  8,  8,  8,  8,  8,  8,  8,  5,  5,  5,  5,  5],
-      [ 8,  8,  8,  8,  8,  5,  5,  5,  5,  5,  5,  5,  5,  5],
-      [ 5,  5,  5,  5,  5,  5,  5,  5, 10, 10, 10, 10, 10, 10],
-      [ 5,  5,  5,  5,  5,  5, 10, 10, 10, 10, 10, 10, 10, 10],
-      [10, 10, 10, 10, 10, 10, 10, 10,  9,  9,  9,  9,  9,  9],
-      [10, 10, 10, 10, 10, 10,  9,  9,  9,  9,  9,  9,  9,  9],
-      [ 9,  9,  9,  9,  9,  9,  9,  9,  7,  7,  7,  7,  7,  7],
-      [ 9,  9,  9,  9,  9,  9,  7,  7,  7,  7,  7,  7,  7,  7],
-      [ 7,  7,  7,  7,  7,  7,  7,  7,  8,  8,  8,  8,  8,  8],
-      [ 7,  7,  7,  7,  7,  7,  8,  8,  8,  8,  8,  8,  8,  8]
+      [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7
+      ],
+      [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7
+      ],
+      [
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      [
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
     ]
   },
   "bucketQueue": [
-    { "id": 401, "colorId": 8,  "capacity": 14, "requiredScrews": 3 },
-    { "id": 402, "colorId": 7,  "capacity": 14, "requiredScrews": 3 },
-    { "id": 403, "colorId": 9,  "capacity": 14, "requiredScrews": 3 },
-    { "id": 404, "colorId": 8,  "capacity": 14, "requiredScrews": 3 },
-    { "id": 405, "colorId": 7,  "capacity": 14, "requiredScrews": 3 },
-    { "id": 406, "colorId": 10, "capacity": 14, "requiredScrews": 3 },
-    { "id": 407, "colorId": 9,  "capacity": 14, "requiredScrews": 3 },
-    { "id": 408, "colorId": 5,  "capacity": 14, "requiredScrews": 3 },
-    { "id": 409, "colorId": 10, "capacity": 14, "requiredScrews": 3 },
-    { "id": 410, "colorId": 5,  "capacity": 14, "requiredScrews": 3 }
+    {
+      "id": 401,
+      "colorId": 8,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 402,
+      "colorId": 7,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 403,
+      "colorId": 7,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 404,
+      "colorId": 9,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 405,
+      "colorId": 9,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 406,
+      "colorId": 10,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 407,
+      "colorId": 10,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 408,
+      "colorId": 5,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 409,
+      "colorId": 5,
+      "capacity": 14,
+      "requiredScrews": 3
+    },
+    {
+      "id": 410,
+      "colorId": 8,
+      "capacity": 14,
+      "requiredScrews": 3
+    }
   ],
   "queueColumns": [
     {
       "columnIndex": 0,
       "rimColorId": 8,
       "items": [
-        { "colorId": 8 },
-        { "colorId": 7 },
-        { "colorId": 9 },
-        { "colorId": 8, "isMystery": true },
-        { "colorId": 10 },
-        { "colorId": 5 }
+        {
+          "colorId": 8
+        },
+        {
+          "colorId": 7
+        },
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 8,
+          "isMystery": true
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 5
+        }
       ]
     },
     {
       "columnIndex": 1,
       "rimColorId": 7,
       "items": [
-        { "colorId": 7 },
-        { "colorId": 8 },
-        { "colorId": 7 },
-        { "colorId": 9, "isMystery": true },
-        { "colorId": 5 },
-        { "colorId": 10 }
+        {
+          "colorId": 7
+        },
+        {
+          "colorId": 8
+        },
+        {
+          "colorId": 7
+        },
+        {
+          "colorId": 9,
+          "isMystery": true
+        },
+        {
+          "colorId": 5
+        },
+        {
+          "colorId": 10
+        }
       ]
     },
     {
       "columnIndex": 2,
       "rimColorId": 9,
       "items": [
-        { "colorId": 8 },
-        { "colorId": 9 },
-        { "colorId": 7 },
-        { "colorId": 10, "isMystery": true },
-        { "colorId": 9 },
-        { "colorId": 5 }
+        {
+          "colorId": 8
+        },
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 7
+        },
+        {
+          "colorId": 10,
+          "isMystery": true
+        },
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 5
+        }
       ]
     },
     {
       "columnIndex": 3,
       "rimColorId": 10,
       "items": [
-        { "colorId": 7 },
-        { "colorId": 9 },
-        { "colorId": 8 },
-        { "colorId": 10, "isMystery": true },
-        { "colorId": 5 },
-        { "colorId": 5 }
+        {
+          "colorId": 7
+        },
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 8
+        },
+        {
+          "colorId": 10,
+          "isMystery": true
+        },
+        {
+          "colorId": 5
+        },
+        {
+          "colorId": 5
+        }
       ]
     },
     {
       "columnIndex": 4,
       "rimColorId": 5,
       "items": [
-        { "colorId": 9 },
-        { "colorId": 8 },
-        { "colorId": 10 },
-        { "colorId": 7, "isMystery": true },
-        { "colorId": 10 },
-        { "colorId": 5 }
+        {
+          "colorId": 9
+        },
+        {
+          "colorId": 8
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 7,
+          "isMystery": true
+        },
+        {
+          "colorId": 10
+        },
+        {
+          "colorId": 5
+        }
       ]
     }
   ]
 }
-

@@ -125,6 +125,10 @@ export class LinearConveyorView {
         highlightLockedBuckets
       );
     }
+
+    for (const leaving of conveyor.leavingBuckets) {
+      SandBucketView.draw(ctx, leaving.visualX, bucketCenterY, bucketWidth, leaving, nowMs, false);
+    }
     ctx.restore();
 
     // 3. Left & Right Tunnels (startTunnel & endTunnel)

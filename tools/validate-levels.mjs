@@ -9,12 +9,97 @@ const palettePath = path.join(rootDir, 'public/assets/data/palette.json');
 const palette = JSON.parse(fs.readFileSync(palettePath, 'utf8'));
 const validColorIds = new Set(palette.map((p) => p.colorId));
 
+function pullOriginY(grid, H, W, cid) {
+  let bestX = -1;
+  let bestY = -1;
+  let bestOriginY = -1;
+  for (let x = 0; x < W; x++) {
+    let y = -1;
+    for (let yy = H - 1; yy >= 0; yy--) {
+      if (grid[yy][x] !== null) {
+        y = yy;
+        break;
+      }
+    }
+    if (y >= 0 && grid[y][x].cid === cid) {
+      if (grid[y][x].originY > bestOriginY) {
+        bestOriginY = grid[y][x].originY;
+        bestX = x;
+        bestY = y;
+      }
+    }
+  }
+  if (bestX < 0) return false;
+  for (let yy = bestY; yy > 0; yy--) {
+    grid[yy][bestX] = grid[yy - 1][bestX];
+  }
+  grid[0][bestX] = null;
+  return true;
+}
+
+function stressTestRandomUnlockOrder(levelData, slots, trials = 200) {
+  const H = levelData.sandBoard.height;
+  const W = levelData.sandBoard.width;
+  let failures = 0;
+
+  for (let t = 0; t < trials; t++) {
+    const g = levelData.sandBoard.grid.map((r, y) =>
+      r.map((cid) => (cid > 0 ? { cid, originY: y } : null))
+    );
+    const q = levelData.bucketQueue.map((b, idx) => ({
+      ...b,
+      seq: idx + 1,
+      collected: 0,
+      isOpen: false
+    }));
+    const active = [];
+
+    let steps = 0;
+    while (steps++ < 500) {
+      let drained = true;
+      while (drained) {
+        drained = false;
+        while (active.length < slots && q.length > 0) {
+          active.push(q.shift());
+        }
+        active.sort((a, b) => b.collected - a.collected || a.seq - b.seq);
+        for (let i = 0; i < active.length; i++) {
+          const b = active[i];
+          if (!b.isOpen) continue;
+          while (b.collected < b.capacity && pullOriginY(g, H, W, b.colorId)) {
+            b.collected++;
+            drained = true;
+          }
+          if (b.collected >= b.capacity) {
+            active.splice(i, 1);
+            drained = true;
+            break;
+          }
+        }
+      }
+      if (active.length === 0 && q.length === 0) break;
+      const locked = active.filter((b) => !b.isOpen);
+      if (locked.length > 0) {
+        const pick = locked[Math.floor(Math.random() * locked.length)];
+        pick.isOpen = true;
+      } else {
+        failures++;
+        break;
+      }
+    }
+  }
+  return failures;
+}
+
 function simulateFullGame(levelData) {
   const H = levelData.sandBoard.height;
   const W = levelData.sandBoard.width;
-  const grid = levelData.sandBoard.grid.map((r) => r.slice());
-  const bucketQueue = levelData.bucketQueue.map((b) => ({
+  const grid = levelData.sandBoard.grid.map((r, y) =>
+    r.map((cid) => (cid > 0 ? { cid, originY: y } : null))
+  );
+  const bucketQueue = levelData.bucketQueue.map((b, idx) => ({
     ...b,
+    seq: idx + 1,
     holes: 0,
     isOpen: false,
     collected: 0
@@ -24,22 +109,6 @@ function simulateFullGame(levelData) {
   const activeBuckets = [];
   const buffer = [];
   const cols = levelData.queueColumns.map((c) => c.items.map((it) => ({ ...it })));
-
-  function lowest(x) {
-    for (let y = H - 1; y >= 0; y--) if (grid[y][x] > 0) return y;
-    return -1;
-  }
-  function pull(cid) {
-    for (let x = 0; x < W; x++) {
-      const y = lowest(x);
-      if (y >= 0 && grid[y][x] === cid) {
-        for (let yy = y; yy > 0; yy--) grid[yy][x] = grid[yy - 1][x];
-        grid[0][x] = 0;
-        return true;
-      }
-    }
-    return false;
-  }
 
   function settle() {
     let changed = true;
@@ -61,10 +130,11 @@ function simulateFullGame(levelData) {
           changed = true;
         }
       }
+      activeBuckets.sort((a, b) => b.collected - a.collected || a.seq - b.seq);
       for (let i = activeBuckets.length - 1; i >= 0; i--) {
         const b = activeBuckets[i];
         if (b.isOpen) {
-          while (b.collected < b.capacity && pull(b.colorId)) {
+          while (b.collected < b.capacity && pullOriginY(grid, H, W, b.colorId)) {
             b.collected++;
             changed = true;
           }
@@ -84,7 +154,7 @@ function simulateFullGame(levelData) {
     settle();
     const totalLeftScrews = cols.reduce((acc, c) => acc + c.length, 0);
     if (totalLeftScrews === 0 && activeBuckets.length === 0 && bucketQueue.length === 0) {
-      const remSand = grid.flat().filter((c) => c > 0).length;
+      const remSand = grid.flat().filter((c) => c !== null).length;
       return { won: remSand === 0, steps, remSand };
     }
     let pickedCol = -1;
@@ -141,11 +211,19 @@ function simulateFullGame(levelData) {
 }
 
 const levelsDir = path.join(rootDir, 'public/assets/data/levels');
+const docsLevelsDir = path.join(rootDir, '_Docs/levels');
 const files = fs.readdirSync(levelsDir).filter((f) => f.endsWith('.json')).sort();
 
 let allPassed = true;
 for (const file of files) {
-  const data = JSON.parse(fs.readFileSync(path.join(levelsDir, file), 'utf8'));
+  const runtimeRaw = fs.readFileSync(path.join(levelsDir, file), 'utf8').replace(/\r\n/g, '\n');
+  const docsRaw = fs.readFileSync(path.join(docsLevelsDir, file), 'utf8').replace(/\r\n/g, '\n');
+  if (runtimeRaw !== docsRaw) {
+    console.error(`[FAIL] ${file}: _Docs/levels/${file} is out of sync with public/assets/data/levels/${file}`);
+    allPassed = false;
+  }
+
+  const data = JSON.parse(runtimeRaw);
   const grid = data.sandBoard.grid;
   if (grid.length !== data.sandBoard.height) {
     console.error(`[FAIL] ${file}: grid height mismatch`);
@@ -203,16 +281,23 @@ for (const file of files) {
     }
   }
 
+  for (const slots of [2, 3, 4]) {
+    const failCount = stressTestRandomUnlockOrder(data, slots, 200);
+    if (failCount > 0) {
+      console.error(`[FAIL] ${file}: Random unlock stress test failed ${failCount}/200 times for slots=${slots}`);
+      allPassed = false;
+    }
+  }
+
   const sim = simulateFullGame(data);
   if (!sim.won) {
     console.error(`[FAIL] ${file}: Bot solver failed:`, sim);
     allPassed = false;
   } else {
     console.log(
-      `[PASS] ${file} (${data.title}) — Grid ${data.sandBoard.width}x${data.sandBoard.height}, Colors: [${Object.keys(sandCounts).join(', ')}], Buckets: ${data.bucketQueue.length}, Screws: ${Object.values(screwCounts).reduce((a, b) => a + b, 0)}, Solved in ${sim.steps} steps (2 slots)`
+      `[PASS] ${file} (${data.title}) — Grid ${data.sandBoard.width}x${data.sandBoard.height}, Colors: [${Object.keys(sandCounts).join(', ')}], Buckets: ${data.bucketQueue.length}, Screws: ${Object.values(screwCounts).reduce((a, b) => a + b, 0)}, Bot solved in ${sim.steps} steps, StressTest(2,3,4 slots)=600/600 PASS`
     );
   }
 }
 
 if (!allPassed) process.exit(1);
-

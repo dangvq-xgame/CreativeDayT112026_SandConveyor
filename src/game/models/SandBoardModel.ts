@@ -2,6 +2,8 @@ import { ColorId } from '../../types/level.types';
 
 export interface SandCell {
   colorId: ColorId;
+  /** Original row index (0 .. height-1) so lower strata always drain before upper strata */
+  originY: number;
   /** Vertical pixel offset for smooth gravity falling animation (negative while falling down to 0) */
   offsetY: number;
   velocityY: number;
@@ -20,11 +22,11 @@ export class SandBoardModel {
     this.height = height;
     this.subDivision = subDivision;
     let count = 0;
-    this.cells = grid.map((row) =>
+    this.cells = grid.map((row, y) =>
       row.map((cid) => {
         if (cid > 0) {
           count++;
-          return { colorId: cid, offsetY: 0, velocityY: 0 };
+          return { colorId: cid, originY: y, offsetY: 0, velocityY: 0 };
         }
         return null;
       })
@@ -56,24 +58,26 @@ export class SandBoardModel {
   }
 
   /**
-   * Finds a column whose bottom-most cell has matching colorId, preferring columns closest to preferredColX.
-   * Removes that cell and shifts all cells above it in that column down by 1 row (applying cellSizePx to offsetY).
+   * Finds a column whose bottom-most cell has matching colorId, prioritizing the lowest original stratum
+   * (`originY` descending) first so the picture drains evenly layer-by-layer without vertical chimneys,
+   * and breaking ties by proximity to `preferredColX`.
    */
   pullBottomCellOfColor(
     colorId: ColorId,
     cellSizePx = 20,
     preferredColX?: number
   ): { col: number; row: number; colorId: ColorId } | null {
-    const candidates: Array<{ col: number; row: number; dist: number }> = [];
+    const candidates: Array<{ col: number; row: number; originY: number; dist: number }> = [];
     for (let x = 0; x < this.width; x++) {
       const y = this.getLowestRow(x);
-      if (y >= 0 && this.cells[y][x]?.colorId === colorId) {
+      const cell = y >= 0 ? this.cells[y][x] : null;
+      if (cell && cell.colorId === colorId) {
         const dist = preferredColX !== undefined ? Math.abs(x - preferredColX) : x;
-        candidates.push({ col: x, row: y, dist });
+        candidates.push({ col: x, row: y, originY: cell.originY, dist });
       }
     }
     if (candidates.length === 0) return null;
-    candidates.sort((a, b) => a.dist - b.dist || a.col - b.col);
+    candidates.sort((a, b) => b.originY - a.originY || a.dist - b.dist || a.col - b.col);
     const chosen = candidates[0];
     const { col, row } = chosen;
 
@@ -106,4 +110,3 @@ export class SandBoardModel {
     }
   }
 }
-

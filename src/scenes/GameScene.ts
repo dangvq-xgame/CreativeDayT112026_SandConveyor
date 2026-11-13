@@ -237,7 +237,12 @@ export class GameScene {
       if (Math.abs(y - bucketCenterY) <= bucketWidth * 0.68) {
         for (let i = 0; i < this.state.conveyor.activeSlots; i++) {
           const b = this.state.conveyor.slots[i];
-          if (b && !b.isOpen && Math.abs(x - b.visualX) <= bucketWidth * 0.5) {
+          if (
+            b &&
+            !b.isOpen &&
+            b.getMissingScrewsCount() > 0 &&
+            Math.abs(x - b.visualX) <= bucketWidth * 0.5
+          ) {
             this.executeHandBoosterOnBucket(b, i, nowMs);
             return;
           }
@@ -566,15 +571,19 @@ export class GameScene {
         const b = this.state.conveyor.slots[i];
         const nextX = this.state.conveyor.getSlotX(i, trackStartX, trackEndX);
         if (b) {
-          const wrapped = b.visualX > 0 && nextX < b.visualX - bucketWidth;
           b.visualX = nextX;
-          if (
-            b.completedAtMs !== null &&
-            nowMs - b.completedAtMs > 340 &&
-            (wrapped || nextX >= visibleMaxX + bucketWidth * 0.42)
-          ) {
+          if (b.completedAtMs !== null && nowMs - b.completedAtMs > 280) {
+            this.state.conveyor.leavingBuckets.push(b);
             this.state.conveyor.slots[i] = null;
           }
+        }
+      }
+
+      for (let i = this.state.conveyor.leavingBuckets.length - 1; i >= 0; i--) {
+        const lb = this.state.conveyor.leavingBuckets[i];
+        lb.visualX += 420 * dtSec;
+        if (lb.visualX >= visibleMaxX + bucketWidth * 0.55) {
+          this.state.conveyor.leavingBuckets.splice(i, 1);
         }
       }
 
@@ -583,7 +592,7 @@ export class GameScene {
         this.conveyorLayout.trackEndX,
         this.conveyorLayout.visibleMinX,
         this.conveyorLayout.visibleMaxX,
-        false
+        true
       );
     }
 
